@@ -1,0 +1,314 @@
+/* Enhanced full-window split-screen registration/login page */
+
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #181a20;
+}
+
+.registration-root {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #181a20;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+}
+
+.registration-left {
+  flex: 1;
+  background: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: #fff;
+  padding: 0 0 0 8vw;
+  position: relative;
+  min-width: 0;
+}
+.registration-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(24,24,32,0.92) 60%, rgba(24,24,32,0.7) 100%);
+  z-index: 1;
+}
+.registration-left-content {
+  position: relative;
+  z-index: 2;
+  max-width: 480px;
+  padding: 60px 0 60px 0;
+}
+.registration-left .circle {
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border-radius: 50%;
+  margin-bottom: 38px;
+}
+.registration-left h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 22px;
+  letter-spacing: 0.5px;
+}
+.registration-left p {
+  font-size: 1.22rem;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.registration-right {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 8vw;
+  min-width: 0;
+  position: relative;
+  box-shadow: -2px 0 16px rgba(0,0,0,0.08);
+  overflow-y: auto; /* This is the key fix for scrolling */
+}
+.registration-top-link {
+  position: absolute;
+  top: 36px;
+  right: 8vw;
+  font-size: 1.05rem;
+  color: #222;
+  z-index: 2;
+}
+.registration-top-link a {
+  color: #222;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.registration-form-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  padding: 48px 36px 36px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.registration-form-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  margin-bottom: 28px;
+  color: #222;
+  letter-spacing: 0.5px;
+}
+.social-btn {
+  width: 100%;
+  padding: 14px 0;
+  border: 1.5px solid #bbb;
+  border-radius: 32px;
+  background: #fff;
+  color: #222;
+  font-size: 1.13rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.social-btn:hover {
+  border-color: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 28px 0 20px 0;
+}
+.divider-line {
+  flex: 1;
+  height: 1.5px;
+  background: #e0e0e0;
+}
+.divider-text {
+  margin: 0 14px;
+  color: #888;
+  font-size: 1.05rem;
+}
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.registration-form input,
+.registration-form select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #bbb;
+  border-radius: 10px;
+  font-size: 1.08rem;
+  background: #fafafa;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+}
+.registration-form input:focus,
+.registration-form select:focus {
+  border-color: #222;
+}
+.registration-form button {
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+.registration-form button:disabled {
+  background: #bbb;
+  color: #fff;
+  cursor: not-allowed;
+}
+.registration-form .error {
+  color: #e53935;
+  font-size: 1.05rem;
+  margin-top: 4px;
+}
+.registration-bottom-link {
+  margin-top: 22px;
+  text-align: center;
+  color: #888;
+  font-size: 1.05rem;
+}
+.registration-bottom-link a {
+  color: #222;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.registration-app-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 10px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.attendee-form-container {
+  width: 100%;
+  max-width: 420px; /* Or adjust as needed */
+  display: flex;
+  flex-direction: column;
+}
+.registration-input {
+  font-size: 1.08rem;
+  border-radius: 10px;
+  border: 1.5px solid #bbb;
+  padding: 14px 16px;
+  background: #fafafa;
+  color: #222;
+  margin-bottom: 16px; /* Increased spacing */
+  width: 100%;
+  box-sizing: border-box;
+  transition: border 0.2s;
+}
+.registration-input:focus {
+  border-color: #222;
+}
+.options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Space between options */
+  margin: 12px 0;
+}
+.styled-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+}
+.styled-checkbox input[type="checkbox"] {
+  width: 1.15em;
+  height: 1.15em;
+  accent-color: #222;
+  margin: 0;
+}
+.family-safety-section {
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.child-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.child-row input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.terms-section {
+  margin: 16px 0;
+}
+.privacy-note {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 8px;
+  padding-left: 30px; /* Align with checkbox text */
+}
+@media (max-width: 1200px) {
+  .registration-left, .registration-right {
+    padding-left: 2vw;
+    padding-right: 2vw;
+  }
+  .registration-form-container {
+    padding: 32px 12px 24px 12px;
+  }
+}
+@media (max-width: 900px) {
+  .registration-root {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  .registration-left, .registration-right {
+    flex: unset;
+    width: 100vw;
+    min-height: 320px;
+    padding: 32px 8px;
+  }
+  .registration-left {
+    align-items: center;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .registration-form-container {
+    padding: 24px 4px 16px 4px;
+  }
+  .attendee-form-container {
+    padding: 0 2vw;
+  }
+} 
