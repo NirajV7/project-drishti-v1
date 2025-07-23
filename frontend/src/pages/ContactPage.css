@@ -1,0 +1,252 @@
+/* frontend/src/pages/ContactPage.css */
+
+.contact-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.contact-page-content {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 100%;
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* Left Panel: Form */
+.contact-form-panel {
+  flex: 1;
+  padding: 48px 64px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.contact-form-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0 0 16px 0;
+}
+
+.contact-form-header p {
+  font-size: 16px;
+  color: #667085;
+  margin: 0 0 48px 0;
+  line-height: 1.5;
+}
+
+.contact-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-row {
+  display: flex;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.phone-input-wrapper,
+.country-code-select {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 16px;
+  color: #101828;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.phone-input-wrapper:focus-within,
+.country-code-select:focus {
+  border-color: #84adf8;
+  box-shadow: 0 0 0 4px #d1e0ff;
+  outline: none;
+}
+
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.country-code-select {
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background-color: #f9fafb;
+  padding-right: 8px;
+  font-weight: 500;
+}
+
+#phone {
+  border: none;
+  border-radius: 0 8px 8px 0;
+  padding-left: 8px;
+  flex: 1;
+}
+
+#phone:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.employee-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.employee-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.employee-option.selected {
+  border-color: #84adf8;
+  background-color: #f0f5ff;
+  box-shadow: 0 0 0 4px #d1e0ff;
+}
+
+.employee-option .icon {
+  font-size: 20px;
+  margin-top: 4px;
+}
+.employee-option .title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  display: block;
+}
+.employee-option .description {
+  font-size: 14px;
+  color: #667085;
+}
+
+.submit-button {
+  background-color: #444ce7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #3538b9;
+}
+
+
+/* Right Panel: Image & Testimonial */
+.contact-image-panel {
+  flex: 1;
+  position: relative;
+  border-radius: 0 24px 24px 0;
+  overflow: hidden;
+}
+
+.contact-panel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.testimonial-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 48px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  color: #fff;
+}
+
+.testimonial-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.testimonial-logo img {
+    width: 40px;
+    height: 40px;
+    filter: brightness(0) invert(1);
+}
+
+.testimonial-logo span {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.testimonial-text {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 32px 0;
+}
+
+.testimonial-author-section {
+    display: flex;
+    gap: 24px;
+}
+
+.testimonial-author .author-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+.testimonial-author .author-role {
+  font-size: 14px;
+  color: #e4e7ec;
+}
+
+@media (max-width: 900px) {
+  .contact-page-content {
+    flex-direction: column;
+  }
+  .contact-form-panel {
+    padding: 48px;
+  }
+}
+@media (max-width: 600px) {
+    .contact-page-container {
+        padding: 24px 12px;
+    }
+    .contact-form-panel {
+        padding: 32px 24px;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+} 

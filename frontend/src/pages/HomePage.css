@@ -1,0 +1,86 @@
+.home-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64px;
+  gap: 48px;
+  background: linear-gradient(-45deg, #e0e7ff, #c8d4f5, #f0f2f5, #dbe2f1);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
+}
+
+.home-hero-text {
+  max-width: 540px;
+  animation: fadeInText 1s ease-in-out;
+}
+@keyframes fadeInText {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.home-hero-text h1 {
+  font-size: 3.5rem; /* Larger font size */
+  font-weight: 800;
+  margin-bottom: 24px;
+  background: -webkit-linear-gradient(45deg, #444ce7, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.home-hero-text h4 {
+  font-size: 1.5rem;
+  color: #344054; /* Subtler color */
+  margin-bottom: 32px;
+}
+.home-hero-buttons {
+  display: flex;
+  gap: 16px;
+}
+.home-hero-buttons .cta-button {
+    border: none;
+    padding: 12px 28px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.home-hero-buttons .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(68, 76, 231, 0.2);
+}
+
+.home-hero-buttons .cta-button.primary {
+  background: #444ce7;
+  color: #fff;
+}
+.home-hero-buttons .cta-button.secondary {
+  background: #fff;
+  color: #444ce7;
+  border: 1px solid #d0d5dd;
+}
+
+.home-hero-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: floatImage 4s ease-in-out infinite;
+}
+
+@keyframes floatImage {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+
+.home-hero-image img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+  filter: drop-shadow(0 0 1rem rgba(68, 76, 231, 0.3));
+} 

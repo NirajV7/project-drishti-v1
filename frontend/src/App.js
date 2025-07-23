@@ -3,55 +3,46 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './AuthContext';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
+import ContactPage from './pages/ContactPage';
+import AboutPage from './pages/AboutPage';
 import SignupForm from './components/auth/SignupForm';
 import LoginForm from './components/auth/LoginForm';
-import StaffLoginForm from './components/staff/StaffLoginForm'; // Assuming you still want this
+import StaffLoginForm from './components/auth/StaffLoginForm';
 import ProfessionalDashboard from './pages/ProfessionalDashboard';
 import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppRoutes />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
 function AppRoutes() {
-  const { currentUser, userRole } = useAuth();
+  const { currentUser } = useAuth();
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          currentUser
-            ? (userRole === 'commander' || userRole === 'admin')
-              ? <Navigate to="/dashboard" />
-              : <Navigate to="/home" />
-            : <Navigate to="/login" />
-        }
-      />
-      <Route
-        path="/"
-        element={!currentUser ? <AuthPage /> : (userRole === 'commander' || userRole === 'admin') ? <Navigate to="/dashboard" /> : <Navigate to="/home" />}
-      >
-        <Route path="login" element={<LoginForm />} />
-        <Route path="signup" element={<SignupForm />} />
-        <Route path="staff-login" element={<StaffLoginForm />} />
+      <Route path="/" element={!currentUser ? <Navigate to="/login" /> : <HomePage />} />
+      <Route path="/home" element={currentUser ? <HomePage /> : <Navigate to="/login" />} />
+      <Route path="/about" element={currentUser ? <AboutPage /> : <Navigate to="/login" />} />
+      <Route path="/contact" element={currentUser ? <ContactPage /> : <Navigate to="/login" />} />
+      <Route path="/dashboard" element={currentUser ? <ProfessionalDashboard /> : <Navigate to="/login" />} />
+      
+      {/* Auth routes with shared layout */}
+      <Route element={<AuthPage />}>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupForm />} />
+        <Route path="/staff-login" element={<StaffLoginForm />} />
       </Route>
-      <Route
-        path="/home"
-        element={currentUser && userRole !== 'commander' && userRole !== 'admin' ? <HomePage /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/dashboard"
-        element={currentUser && (userRole === 'commander' || userRole === 'admin') ? <ProfessionalDashboard /> : <Navigate to="/login" />}
-      />
+      
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }
+
 
 export default App;

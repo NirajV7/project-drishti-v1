@@ -1,0 +1,92 @@
+/* frontend/src/pages/AboutPage.css */
+.about-page {
+  flex-direction: column;
+  padding: 48px 64px;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+
+.about-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  margin-bottom: 64px;
+}
+.about-hero-text {
+  max-width: 540px;
+}
+.about-hero-text h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #101828;
+  margin-bottom: 16px;
+}
+.about-hero-text p {
+  font-size: 1.1rem;
+  color: #667085;
+  line-height: 1.6;
+}
+.about-hero-image img {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+.how-it-works-section {
+  text-align: center;
+  margin-bottom: 64px;
+}
+.how-it-works-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #101828;
+  margin-bottom: 32px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+.feature-card {
+  background-color: #f9fafb;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+.feature-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #101828;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 1rem;
+  color: #667085;
+}
+.team-section {
+    text-align: center;
+}
+.team-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #101828;
+    margin-bottom: 8px;
+}
+.team-section p {
+    font-size: 1.2rem;
+    color: #444ce7;
+    font-weight: 500;
+} 
