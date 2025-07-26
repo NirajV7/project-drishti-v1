@@ -4,11 +4,12 @@ import './AIChatPanel.css';
 
 const API_KEY = "AIzaSyBFxnbKs6ALSH-vQ_RBU2XVpvdv_8za7bk";
 
-function AIChatPanel({ context, onClose }) {
+function AIChatPanel({ context, onClose, setActivePage }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chat, setChat] = useState(null);
+  const [showSimulationPrompt, setShowSimulationPrompt] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -66,25 +67,44 @@ function AIChatPanel({ context, onClose }) {
     setMessages(newMessages);
     if (!predefinedQuery) setInput('');
     setIsLoading(true);
+    setShowSimulationPrompt(false);
 
     try {
         const result = await chat.sendMessageStream(query);
         
         setMessages(prev => [...prev, { sender: 'ai', text: '' }]);
 
+        let aiResponse = '';
         for await (const chunk of result.stream) {
             const chunkText = chunk.text();
+            aiResponse += chunkText;
             setMessages(prev => {
                 const updatedMessages = [...prev];
-                updatedMessages[updatedMessages.length - 1].text += chunkText;
+                updatedMessages[updatedMessages.length - 1].text = aiResponse;
                 return updatedMessages;
             });
         }
+
+        if (query.toLowerCase().includes("best actions")) {
+            setShowSimulationPrompt(true);
+        }
+
     } catch (error) {
         console.error("Error fetching AI response:", error);
         setMessages([...newMessages, { sender: 'ai', text: 'Sorry, I am having trouble connecting to the network.' }]);
     } finally {
         setIsLoading(false);
+    }
+  };
+
+  const handleSimulationChoice = (choice) => {
+    setShowSimulationPrompt(false);
+    if (choice === 'yes' && setActivePage) {
+        setActivePage('ghost');
+        onClose(); // Close the chat panel
+    } else {
+        // Optional: Handle 'no' choice by adding a confirmation message
+        setMessages(prev => [...prev, { sender: 'ai', text: "Understood. Standing by for further instructions." }]);
     }
   };
   
@@ -112,12 +132,23 @@ function AIChatPanel({ context, onClose }) {
               </div>
             </div>
           )}
+
+          {showSimulationPrompt && (
+            <div className="message ai simulation-prompt">
+              <p>Would you like to run a simulation?</p>
+              <div className="simulation-buttons">
+                <button onClick={() => handleSimulationChoice('yes')}>Yes</button>
+                <button onClick={() => handleSimulationChoice('no')}>No</button>
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
         <div className="ai-chat-suggestions">
-            <button onClick={() => handleSuggestionClick('What is the current situation at this location?')}>"Summarize the situation."</button>
-            <button onClick={() => handleSuggestionClick('What are the top 3 recommended actions?')}>"What are the best actions?"</button>
+            <button onClick={() => handleSuggestionClick('Summarize the situation.')}>"Summarize the situation."</button>
+            <button onClick={() => handleSuggestionClick('What are the best actions?')}>"What are the best actions?"</button>
             <button onClick={() => handleSuggestionClick('What is the worst-case scenario here?')}>"What is the worst-case?"</button>
         </div>
 

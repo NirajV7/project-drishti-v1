@@ -25,7 +25,7 @@ const initialCameraData = {
     },
 };
 
-export default function CCTVPage() {
+export default function CCTVPage({ setActivePage }) {
     const { userRole } = useAuth();
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
@@ -231,6 +231,7 @@ export default function CCTVPage() {
             <AIChatPanel 
               context={chatContext}
               onClose={() => setShowChat(false)}
+              setActivePage={setActivePage}
             />
           )}
     

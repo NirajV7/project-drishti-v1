@@ -97,6 +97,32 @@
   margin: 0;
 }
 
+.simulation-prompt p {
+  margin-bottom: 12px;
+}
+
+.simulation-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.simulation-buttons button {
+  background-color: #3b3b58;
+  color: #c7c7e2;
+  border: 1px solid #4a4a70;
+  border-radius: 8px;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.simulation-buttons button:hover {
+  background-color: #a29bfe;
+  color: #1e1e2f;
+  border-color: #a29bfe;
+}
+
 .ai-chat-suggestions {
   display: flex;
   flex-wrap: wrap;

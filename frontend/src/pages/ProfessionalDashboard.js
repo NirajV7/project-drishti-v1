@@ -15,7 +15,7 @@ function ProfessionalDashboard() {
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard':
-        return <CCTVPage />;
+        return <CCTVPage setActivePage={setActivePage} />;
       case 'ghost':
         return <GhostProtocolPage />;
       case 'map':
@@ -73,7 +73,7 @@ function ProfessionalDashboard() {
             {renderContent()}
           </div>
         </main>
-        {isChatOpen && <AIChatPanel context="General inquiry." onClose={() => setIsChatOpen(false)} />}
+        {isChatOpen && <AIChatPanel context="General inquiry." onClose={() => setIsChatOpen(false)} setActivePage={setActivePage} />}
       </div>
     </div>
   );
