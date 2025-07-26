@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:3000", "https://project-drishti-v1-b22d8.web.app"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type"]
+  }
+] 

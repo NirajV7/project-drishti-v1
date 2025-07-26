@@ -1,21 +1,33 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
+# functions/main.py
 
+# Import necessary libraries
 from firebase_functions import https_fn
-from firebase_functions.options import set_global_options
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, firestore
+import datetime
 
-# For cost control, you can set the maximum number of containers that can be
-# running at the same time. This helps mitigate the impact of unexpected
-# traffic spikes by instead downgrading performance. This limit is a per-function
-# limit. You can override the limit for each function using the max_instances
-# parameter in the decorator, e.g. @https_fn.on_request(max_instances=5).
-set_global_options(max_instances=10)
+# Initialize the Firebase app
+initialize_app()
 
-# initialize_app()
-#
-#
-# @https_fn.on_request()
-# def on_request_example(req: https_fn.Request) -> https_fn.Response:
-#     return https_fn.Response("Hello world!")
+# This is a simple HTTP-triggered function for testing
+@https_fn.on_request()
+def test_firestore_connection(req: https_fn.Request) -> https_fn.Response:
+    """
+    A test function to confirm we can write to Firestore.
+    """
+    try:
+        # Get a reference to the Firestore database
+        db = firestore.client()
+
+        # Create a test document in a new collection called "system_status"
+        doc_ref = db.collection("system_status").document("backend_heartbeat")
+        doc_ref.set({
+            "status": "online",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc)
+        })
+
+        print("Successfully wrote to Firestore.")
+        return https_fn.Response("Backend is online. Check your Firestore database.", status=200)
+
+    except Exception as e:
+        print(f"Error writing to Firestore: {e}")
+        return https_fn.Response("An error occurred.", status=500)
