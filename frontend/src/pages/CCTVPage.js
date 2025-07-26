@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext'; // Import useAuth hook
+import AlertModal from '../components/common/AlertModal'; // Import the new modal
+import AIChatPanel from './AIChatPanel'; // Import the new chat panel
 import './ProfessionalDashboard.css';
 
-const cameraData = {
+const initialCameraData = {
     1: { 
-        name: "Service Area",
+        name: "West Seating Area",
         capacity: 50,
         video: '/zone-c.mp4',
         jsonData: '/crowd_data_zone_c.json'
@@ -28,6 +30,10 @@ export default function CCTVPage() {
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
     const [liveCounts, setLiveCounts] = useState({});
+    const [cameraData, setCameraData] = useState(initialCameraData);
+    const [simulationFinished, setSimulationFinished] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [showChat, setShowChat] = useState(false);
     
     const mainVideoRef = useRef(null);
     const thumbVideoRefs = useRef({});
@@ -83,12 +89,65 @@ export default function CCTVPage() {
                 setLiveCounts(prev => ({ ...prev, [selectedFeed]: point.count }));
             }
         };
+        
+        const handleVideoEnd = () => {
+            if (videoElement.src.includes('camera-01-crowd-increasing')) {
+                if (!simulationFinished) {
+                    setSimulationFinished(true);
+                }
+                videoElement.currentTime = 5;
+                videoElement.play();
+            }
+        };
 
         videoElement.addEventListener('timeupdate', handleTimeUpdate);
+        videoElement.addEventListener('ended', handleVideoEnd);
+
         return () => {
-            if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+            if (videoElement) {
+                videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+                videoElement.removeEventListener('ended', handleVideoEnd);
+            }
         };
-    }, [selectedFeed, headcountData]);
+    }, [selectedFeed, headcountData, simulationFinished]);
+
+    useEffect(() => {
+        if (simulationFinished) {
+            setShowAlert(true);
+        }
+    }, [simulationFinished]);
+
+    const handleSimulation = () => {
+        setShowChat(false); // Close chat on new simulation
+        setShowAlert(false); // Hide alert when starting a new simulation
+        setSimulationFinished(false); // Reset on new simulation
+        // Switch video for Cam 1
+        setCameraData(prevData => ({
+            ...prevData,
+            1: {
+                ...prevData[1],
+                video: '/camera-01-crowd-increasing.mp4'
+            }
+        }));
+
+        // Generate fake increasing data for Cam 1
+        const simulationData = [];
+        const startCount = 10; // Approx 20% capacity
+        const endCount = 32;   // Approx 64% capacity
+        const duration = 8;    // 8 seconds
+
+        for (let i = 0; i <= duration; i += 0.5) {
+            // Linear interpolation for gradual increase
+            const progress = i / duration;
+            const currentCount = Math.round(startCount + (endCount - startCount) * progress);
+            simulationData.push({ timestamp: i, count: currentCount });
+        }
+
+        setHeadcountData(prevData => ({
+            ...prevData,
+            1: simulationData
+        }));
+    };
 
 
     const renderSelectedFeed = () => {
@@ -104,10 +163,10 @@ export default function CCTVPage() {
             <div className="feed-visual-placeholder">
               <video 
                 ref={mainVideoRef} 
-                key={selectedFeed}
+                key={`${selectedFeed}-${data.video}`}
                 src={data.video} 
                 autoPlay 
-                loop 
+                loop={!data.video.includes('camera-01-crowd-increasing')}
                 muted 
                 className="feed-image" 
               />
@@ -127,10 +186,28 @@ export default function CCTVPage() {
             {renderSelectedFeed()}
             {userRole === 'admin' && (
               <div className="admin-actions">
-                <button className="admin-button">Admin Action</button>
+                <button className="admin-button" onClick={handleSimulation}>Simulate Crowd Increase</button>
               </div>
             )}
           </div>
+          
+          {showAlert && (
+            <AlertModal
+              title="Predictive Alert"
+              message={`A high-density bottleneck is predicted at ${cameraData[1].name} in 15 minutes. Confidence: 99%. Prediction based on visual, RF, and atmospheric data.`}
+              onClose={() => {
+                setShowAlert(false);
+                setShowChat(true);
+              }}
+            />
+          )}
+
+          {showChat && (
+            <AIChatPanel 
+              context={`A high-density bottleneck is predicted at ${cameraData[1].name} in 15 minutes. What are the best mitigation strategies?`}
+              onClose={() => setShowChat(false)}
+            />
+          )}
     
           <div className="camera-bay">
             {Object.keys(cameraData).map(id => {
