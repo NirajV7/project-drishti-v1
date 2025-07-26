@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../AuthContext'; // Import useAuth hook
 import './ProfessionalDashboard.css';
 
 const cameraData = {
@@ -23,6 +24,7 @@ const cameraData = {
 };
 
 export default function CCTVPage() {
+    const { userRole } = useAuth(); // Get userRole from AuthContext
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
     const [liveCounts, setLiveCounts] = useState({});
@@ -123,6 +125,11 @@ export default function CCTVPage() {
         <>
           <div className="main-feed-screen">
             {renderSelectedFeed()}
+            {userRole === 'admin' && (
+              <div className="admin-actions">
+                <button className="admin-button">Admin Action</button>
+              </div>
+            )}
           </div>
     
           <div className="camera-bay">
