@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../AuthContext'; // Import useAuth hook
-import AlertModal from '../components/common/AlertModal'; // Import the new modal
-import AIChatPanel from './AIChatPanel'; // Import the new chat panel
+import { useAuth } from '../AuthContext'; 
+import AlertModal from '../components/common/AlertModal';
+import AIChatPanel from './AIChatPanel';
 import './ProfessionalDashboard.css';
 
 const initialCameraData = {
@@ -26,76 +26,92 @@ const initialCameraData = {
 };
 
 export default function CCTVPage() {
-    const { userRole } = useAuth(); // Get userRole from AuthContext
+    const { userRole } = useAuth();
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
     const [liveCounts, setLiveCounts] = useState({});
     const [cameraData, setCameraData] = useState(initialCameraData);
-    const [simulationFinished, setSimulationFinished] = useState(false);
+    const [isSimulating, setIsSimulating] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    const [selectedFeedStats, setSelectedFeedStats] = useState({ capacityPercent: 0, oxygenLevel: 20.9, deviceDensity: 0 });
     
     const mainVideoRef = useRef(null);
     const thumbVideoRefs = useRef({});
+    const simulationIntervalRef = useRef(null);
 
-    // 1. Fetch data for all video feeds just once on component mount
+    // Fetch initial data for all cameras or reset to it
     useEffect(() => {
-        Object.keys(cameraData).forEach(id => {
-            fetch(`${cameraData[id].jsonData}?t=${new Date().getTime()}`)
-                .then(response => response.json())
-                .then(data => {
-                    setHeadcountData(prevData => ({ ...prevData, [id]: data }));
-                })
-                .catch(error => console.error('Error fetching headcount data:', error));
-        });
-    }, []);
-
-    // 2. Effect for updating the thumbnail video feeds
-    useEffect(() => {
-        if (Object.keys(headcountData).length === 0) return;
-
-        const cleanupFunctions = [];
-        Object.keys(thumbVideoRefs.current).forEach(id => {
-            const videoElement = thumbVideoRefs.current[id];
-            if (!videoElement) return;
-
-            const handleTimeUpdate = () => {
-                const currentTime = videoElement.currentTime;
-                const dataForFeed = headcountData[id];
-                if (dataForFeed) {
-                    const point = dataForFeed.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
-                    setLiveCounts(prev => ({ ...prev, [id]: point.count }));
-                }
-            };
-            videoElement.addEventListener('timeupdate', handleTimeUpdate);
-            cleanupFunctions.push(() => {
-                if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        if (!isSimulating) {
+            setCameraData(initialCameraData); // Reset video sources
+            Object.keys(initialCameraData).forEach(id => {
+                fetch(`${initialCameraData[id].jsonData}?t=${new Date().getTime()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setHeadcountData(prevData => ({ ...prevData, [id]: data }));
+                    })
+                    .catch(error => console.error('Error fetching headcount data:', error));
             });
-        });
-
-        return () => cleanupFunctions.forEach(fn => fn());
-    }, [headcountData]);
-
-    // 3. Effect for updating the main video feed. Re-runs when the selected feed changes.
+        }
+    }, [isSimulating]);
+    
+    // Effect to run and clean up the simulation timer
     useEffect(() => {
-        const videoElement = mainVideoRef.current;
-        if (!videoElement || !headcountData[selectedFeed]) return;
+        if (isSimulating) {
+            const simulationStartTime = Date.now();
+            const simulationDuration = 8000; // 8 seconds in milliseconds
+            const startCount = 10; // 20% of 50 capacity
+            const endCount = 32;   // 64% of 50 capacity
 
-        const handleTimeUpdate = () => {
-            const currentTime = videoElement.currentTime;
-            const data = headcountData[selectedFeed];
-            if (data) {
-                const point = data.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
-                setLiveCounts(prev => ({ ...prev, [selectedFeed]: point.count }));
+            simulationIntervalRef.current = setInterval(() => {
+                const elapsedTime = Date.now() - simulationStartTime;
+                const progress = Math.min(elapsedTime / simulationDuration, 1);
+
+                const currentCount = Math.round(startCount + (endCount - startCount) * progress);
+                const capacityPercent = Math.round((currentCount / initialCameraData[1].capacity) * 100);
+                const oxygenLevel = 20.9 - (capacityPercent / 100) * 1.5;
+                const deviceDensity = Math.round(currentCount * 1.2);
+
+                setSelectedFeedStats({ capacityPercent, oxygenLevel, deviceDensity });
+                setLiveCounts(prev => ({ ...prev, 1: currentCount }));
+
+                if (progress >= 1) {
+                    clearInterval(simulationIntervalRef.current);
+                    setShowAlert(true); // Trigger alert when simulation finishes
+                }
+            }, 100); // Update every 100ms for smooth transition
+        }
+        
+        return () => {
+            if (simulationIntervalRef.current) {
+                clearInterval(simulationIntervalRef.current);
             }
         };
-        
+    }, [isSimulating]);
+
+    // Effect for handling video data updates (for non-simulation) and video ending
+    useEffect(() => {
+        const videoElement = mainVideoRef.current;
+        if (!videoElement) return;
+
+        const handleTimeUpdate = () => {
+            if (!isSimulating && headcountData[selectedFeed] && headcountData[selectedFeed].length > 0) {
+                const data = headcountData[selectedFeed];
+                const currentTime = videoElement.currentTime;
+                const point = data.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
+                const currentCount = point.count;
+
+                const capacityPercent = Math.round((currentCount / cameraData[selectedFeed].capacity) * 100);
+                const oxygenLevel = 20.9 - (capacityPercent / 100) * 1.5;
+                const deviceDensity = Math.round(currentCount * 1.2);
+
+                setSelectedFeedStats({ capacityPercent, oxygenLevel, deviceDensity });
+            }
+        };
+
         const handleVideoEnd = () => {
             if (videoElement.src.includes('camera-01-crowd-increasing')) {
-                if (!simulationFinished) {
-                    setSimulationFinished(true);
-                }
-                videoElement.currentTime = 5;
+                videoElement.currentTime = 5; 
                 videoElement.play();
             }
         };
@@ -109,53 +125,59 @@ export default function CCTVPage() {
                 videoElement.removeEventListener('ended', handleVideoEnd);
             }
         };
-    }, [selectedFeed, headcountData, simulationFinished]);
+    }, [selectedFeed, headcountData, cameraData, isSimulating]);
 
-    useEffect(() => {
-        if (simulationFinished) {
-            setShowAlert(true);
-        }
-    }, [simulationFinished]);
+    // Effect for updating thumbnail data
+     useEffect(() => {
+        if (Object.keys(headcountData).length === 0) return;
+
+        const cleanupFunctions = [];
+        Object.keys(thumbVideoRefs.current).forEach(id => {
+            const videoElement = thumbVideoRefs.current[id];
+            if (!videoElement) return;
+
+            const handleThumbTimeUpdate = () => {
+                if (id === '1' && isSimulating) return;
+
+                const currentTime = videoElement.currentTime;
+                const dataForFeed = headcountData[id];
+                if (dataForFeed && dataForFeed.length > 0) {
+                    const point = dataForFeed.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
+                    setLiveCounts(prev => ({ ...prev, [id]: point.count }));
+                }
+            };
+            videoElement.addEventListener('timeupdate', handleThumbTimeUpdate);
+            cleanupFunctions.push(() => {
+                if (videoElement) videoElement.removeEventListener('timeupdate', handleThumbTimeUpdate);
+            });
+        });
+
+        return () => cleanupFunctions.forEach(fn => fn());
+    }, [headcountData, isSimulating]);
+
 
     const handleSimulation = () => {
-        setShowChat(false); // Close chat on new simulation
-        setShowAlert(false); // Hide alert when starting a new simulation
-        setSimulationFinished(false); // Reset on new simulation
-        // Switch video for Cam 1
+        if (simulationIntervalRef.current) {
+            clearInterval(simulationIntervalRef.current);
+        }
+        setShowChat(false);
+        setShowAlert(false);
+        setSelectedFeed(1); 
         setCameraData(prevData => ({
             ...prevData,
-            1: {
-                ...prevData[1],
-                video: '/camera-01-crowd-increasing.mp4'
-            }
+            1: { ...prevData[1], video: '/camera-01-crowd-increasing.mp4' }
         }));
-
-        // Generate fake increasing data for Cam 1
-        const simulationData = [];
-        const startCount = 10; // Approx 20% capacity
-        const endCount = 32;   // Approx 64% capacity
-        const duration = 8;    // 8 seconds
-
-        for (let i = 0; i <= duration; i += 0.5) {
-            // Linear interpolation for gradual increase
-            const progress = i / duration;
-            const currentCount = Math.round(startCount + (endCount - startCount) * progress);
-            simulationData.push({ timestamp: i, count: currentCount });
-        }
-
-        setHeadcountData(prevData => ({
-            ...prevData,
-            1: simulationData
-        }));
+        setIsSimulating(true);
     };
-
+    
+    const handleStopSimulation = () => {
+        setIsSimulating(false);
+    };
 
     const renderSelectedFeed = () => {
         const data = cameraData[selectedFeed];
-        const currentCount = liveCounts[selectedFeed] ?? 0;
-        const capacityPercent = Math.round((currentCount / data.capacity) * 100);
-        const oxygenLevel = 20.9 - (capacityPercent / 100) * 1.5;
-        const deviceDensity = Math.round(currentCount * 1.2);
+        if (!data) return null;
+        const { capacityPercent, oxygenLevel, deviceDensity } = selectedFeedStats;
 
         return (
           <div className="main-feed-content">
@@ -180,6 +202,8 @@ export default function CCTVPage() {
         );
     };
 
+    const chatContext = `Current status for ${cameraData[selectedFeed]?.name || ''}: Crowd Density is at ${selectedFeedStats.capacityPercent}%, Estimated Oxygen is ${selectedFeedStats.oxygenLevel.toFixed(1)}%, and Device Density is approximately ${selectedFeedStats.deviceDensity}. A high-density bottleneck is predicted in 15 minutes. What are the best mitigation strategies?`;
+
     return (
         <>
           <div className="main-feed-screen">
@@ -197,6 +221,7 @@ export default function CCTVPage() {
               message={`A high-density bottleneck is predicted at ${cameraData[1].name} in 15 minutes. Confidence: 99%. Prediction based on visual, RF, and atmospheric data.`}
               onClose={() => {
                 setShowAlert(false);
+                handleStopSimulation();
                 setShowChat(true);
               }}
             />
@@ -204,7 +229,7 @@ export default function CCTVPage() {
 
           {showChat && (
             <AIChatPanel 
-              context={`A high-density bottleneck is predicted at ${cameraData[1].name} in 15 minutes. What are the best mitigation strategies?`}
+              context={chatContext}
               onClose={() => setShowChat(false)}
             />
           )}
@@ -221,7 +246,10 @@ export default function CCTVPage() {
                     <div 
                       key={id}
                       className={`camera-thumbnail ${selectedFeed.toString() === id ? 'active' : ''}`}
-                      onClick={() => setSelectedFeed(parseInt(id, 10))}
+                      onClick={() => {
+                          if (isSimulating) handleStopSimulation();
+                          setSelectedFeed(parseInt(id, 10));
+                      }}
                     >
                       <div className="thumb-header">CAM {String(id).padStart(2, '0')}</div>
                       <div className="thumb-visual">

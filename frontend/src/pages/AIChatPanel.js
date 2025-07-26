@@ -1,30 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import './AIChatPanel.css';
 
-// --- CONFIGURATION ---
-// IMPORTANT: This is for demonstration purposes only.
-// In a production app, you should not expose your API key like this.
-const API_KEY = "AIzaSyBFxnbKs6ALSH-vQ_RBU2XVpvdv_8za7bk"; 
+const API_KEY = "AIzaSyBFxnbKs6ALSH-vQ_RBU2XVpvdv_8za7bk";
 
 function AIChatPanel({ context, onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chat, setChat] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   // Initialize the chat session
   useEffect(() => {
-    if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
-        console.error("API key is missing. Please add your API key to AIChatPanel.js");
-        setMessages([{ sender: 'ai', text: 'ERROR: API Key not found. Please configure it in the source code.' }]);
+    if (!API_KEY) {
+        console.error("API key is missing. Please add your API key.");
+        setMessages([{ sender: 'ai', text: 'ERROR: API Key not found.' }]);
         return;
     }
 
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     
-    // The "System Instruction" for the AI.
     const system_instruction = (
       "You are 'The Oracle,' a helpful AI teammate for the 'Project Drishti' security system. " +
       "Your role is to provide clear, concise, and actionable intelligence to event commanders. " +
@@ -35,7 +40,8 @@ function AIChatPanel({ context, onClose }) {
     const initialChat = model.startChat({
       history: [
         { role: "user", parts: [{ text: system_instruction }] },
-        { role: "model", parts: [{ text: "Understood. I am The Oracle, ready to assist." }] }
+        { role: "model", parts: [{ text: "Understood. I am The Oracle, ready to assist." }] },
+        { role: "user", parts: [{ text: `Here is the current situation:\n${context}` }] }
       ],
       generationConfig: {
         maxOutputTokens: 1000,
@@ -43,37 +49,34 @@ function AIChatPanel({ context, onClose }) {
     });
     setChat(initialChat);
     
-    // Set the initial message from the AI based on the context
     setMessages([
       {
         sender: 'ai',
-        text: `${context}`
+        text: "I have analyzed the predictive alert regarding a high-density bottleneck. I have the live data feed. How can I assist you?"
       }
     ]);
-  }, [context]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
-  const handleSend = async () => {
-    if (input.trim() === '' || isLoading || !chat) return;
+  const handleSend = async (predefinedQuery) => {
+    const query = predefinedQuery || input;
+    if (query.trim() === '' || isLoading || !chat) return;
 
-    const newMessages = [...messages, { sender: 'user', text: input }];
+    const newMessages = [...messages, { sender: 'user', text: query }];
     setMessages(newMessages);
-    setInput('');
+    if (!predefinedQuery) setInput('');
     setIsLoading(true);
 
     try {
-        const result = await chat.sendMessageStream(input);
+        const result = await chat.sendMessageStream(query);
         
-        let text = '';
-        // Start with an empty AI message to stream into
-        setMessages(prev => [...prev, { sender: 'ai', text: '...' }]);
+        setMessages(prev => [...prev, { sender: 'ai', text: '' }]);
 
         for await (const chunk of result.stream) {
             const chunkText = chunk.text();
-            text += chunkText;
-            // Update the last message in the array with the new text
             setMessages(prev => {
                 const updatedMessages = [...prev];
-                updatedMessages[updatedMessages.length - 1].text = text;
+                updatedMessages[updatedMessages.length - 1].text += chunkText;
                 return updatedMessages;
             });
         }
@@ -83,6 +86,10 @@ function AIChatPanel({ context, onClose }) {
     } finally {
         setIsLoading(false);
     }
+  };
+  
+  const handleSuggestionClick = (suggestion) => {
+    handleSend(suggestion);
   };
 
   return (
@@ -105,7 +112,15 @@ function AIChatPanel({ context, onClose }) {
               </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
+
+        <div className="ai-chat-suggestions">
+            <button onClick={() => handleSuggestionClick('What is the current situation at this location?')}>"Summarize the situation."</button>
+            <button onClick={() => handleSuggestionClick('What are the top 3 recommended actions?')}>"What are the best actions?"</button>
+            <button onClick={() => handleSuggestionClick('What is the worst-case scenario here?')}>"What is the worst-case?"</button>
+        </div>
+
         <div className="ai-chat-input-area">
           <input 
             type="text" 
@@ -115,7 +130,7 @@ function AIChatPanel({ context, onClose }) {
             onKeyPress={e => e.key === 'Enter' && handleSend()}
             disabled={isLoading || !chat}
           />
-          <button onClick={handleSend} disabled={isLoading || !chat}>Send</button>
+          <button onClick={() => handleSend()} disabled={isLoading || !chat}>Send</button>
         </div>
       </div>
     </div>

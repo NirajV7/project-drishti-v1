@@ -9,11 +9,11 @@ import UserManagementPage from './UserManagementPage';
 import AuditLogPage from './AuditLogPage';
 
 function ProfessionalDashboard() {
-  const [selectedPage, setSelectedPage] = useState('dashboard');
+  const [activePage, setActivePage] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const renderContent = () => {
-    switch (selectedPage) {
+    switch (activePage) {
       case 'dashboard':
         return <CCTVPage />;
       case 'ghost':
@@ -40,12 +40,12 @@ function ProfessionalDashboard() {
                 <span>DRISHTI</span>
             </div>
             <nav className="pd-nav">
-                <a href="#dashboard" className={`pd-nav-item${selectedPage === 'dashboard' ? ' active' : ''}`} onClick={() => setSelectedPage('dashboard')}>Dashboard</a>
-                <a href="#ghost" className={`pd-nav-item${selectedPage === 'ghost' ? ' active' : ''}`} onClick={() => setSelectedPage('ghost')}>Ghost Protocol</a>
-                <a href="#map" className={`pd-nav-item${selectedPage === 'map' ? ' active' : ''}`} onClick={() => setSelectedPage('map')}>Map View</a>
-                <a href="#users" className={`pd-nav-item${selectedPage === 'users' ? ' active' : ''}`} onClick={() => setSelectedPage('users')}>User Management</a>
-                <a href="#audit" className={`pd-nav-item${selectedPage === 'audit' ? ' active' : ''}`} onClick={() => setSelectedPage('audit')}>Audit Log</a>
-                <a href="#settings" className={`pd-nav-item${selectedPage === 'settings' ? ' active' : ''}`} onClick={() => setSelectedPage('settings')}>Settings</a>
+                <a href="#dashboard" className={`pd-nav-item${activePage === 'dashboard' ? ' active' : ''}`} onClick={() => setActivePage('dashboard')}>Dashboard</a>
+                <a href="#ghost" className={`pd-nav-item${activePage === 'ghost' ? ' active' : ''}`} onClick={() => setActivePage('ghost')}>Ghost Protocol</a>
+                <a href="#map" className={`pd-nav-item${activePage === 'map' ? ' active' : ''}`} onClick={() => setActivePage('map')}>Map View</a>
+                <a href="#users" className={`pd-nav-item${activePage === 'users' ? ' active' : ''}`} onClick={() => setActivePage('users')}>User Management</a>
+                <a href="#audit" className={`pd-nav-item${activePage === 'audit' ? ' active' : ''}`} onClick={() => setActivePage('audit')}>Audit Log</a>
+                <a href="#settings" className={`pd-nav-item${activePage === 'settings' ? ' active' : ''}`} onClick={() => setActivePage('settings')}>Settings</a>
             </nav>
             <div className="sidebar-footer">
                 <div className="user-profile">
@@ -73,7 +73,7 @@ function ProfessionalDashboard() {
             {renderContent()}
           </div>
         </main>
-        {isChatOpen && <AIChatPanel onClose={() => setIsChatOpen(false)} />}
+        {isChatOpen && <AIChatPanel context="General inquiry." onClose={() => setIsChatOpen(false)} />}
       </div>
     </div>
   );
