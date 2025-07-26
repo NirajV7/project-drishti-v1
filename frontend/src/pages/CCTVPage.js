@@ -3,37 +3,37 @@ import './ProfessionalDashboard.css';
 
 const cameraData = {
     1: { 
-        headcount: 'N/A', 
-        density: '6.2/m²', 
-        oxygen: '20.8%', 
-        video: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/Video_Ready_Quiet_Zone_Footage.mp4?alt=media&token=787d67de-441a-4b0a-a11e-3ccc983e4865',
-        jsonData: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/crowd_data_zone_c.json?alt=media&token=92211f54-907c-4165-b3a2-bfd84dd0f2fe'
+        name: "Service Area",
+        capacity: 50,
+        video: '/zone-c.mp4',
+        jsonData: '/crowd_data_zone_c.json'
     },
     2: { 
-        headcount: 'N/A', 
-        density: '4.8/m²', 
-        oxygen: '20.9%', 
-        video: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/Crowd_Flow_Simulation_Video_Ready.mp4?alt=media&token=aeb6c48f-290d-4e2c-9751-922ef0e3f8f0',
-        jsonData: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/crowd_data_zone_b.json?alt=media&token=f67360fa-2d25-4564-9278-391ec5343ddb'
+        name: "Entrance",
+        capacity: 75,
+        video: '/zone-b.mp4',
+        jsonData: '/crowd_data_zone_b.json'
     },
     3: { 
-        headcount: 'N/A', 
-        density: '5.1/m²', 
-        oxygen: '20.9%', 
-        video: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/Crowd_Buildup_Video_Generated.mp4?alt=media&token=c1b5dd40-796d-4283-959f-b5b9d12c2228',
-        jsonData: 'https://firebasestorage.googleapis.com/v0/b/project-drishti-v1-b22d8.firebasestorage.app/o/crowd_data_zone_a.json?alt=media&token=3fe9dc55-0bec-43aa-8b36-b2f97b13e4e8'
+        name: "Main Stage",
+        capacity: 100,
+        video: '/zone-a.mp4',
+        jsonData: '/crowd_data_zone_a.json'
     },
 };
 
 export default function CCTVPage() {
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
-    const [currentHeadcount, setCurrentHeadcount] = useState('N/A');
-    const videoRef = useRef(null);
+    const [liveCounts, setLiveCounts] = useState({});
+    
+    const mainVideoRef = useRef(null);
+    const thumbVideoRefs = useRef({});
 
+    // 1. Fetch data for all video feeds just once on component mount
     useEffect(() => {
         Object.keys(cameraData).forEach(id => {
-            fetch(cameraData[id].jsonData)
+            fetch(`${cameraData[id].jsonData}?t=${new Date().getTime()}`)
                 .then(response => response.json())
                 .then(data => {
                     setHeadcountData(prevData => ({ ...prevData, [id]: data }));
@@ -42,42 +42,77 @@ export default function CCTVPage() {
         });
     }, []);
 
+    // 2. Effect for updating the thumbnail video feeds
     useEffect(() => {
-        const videoElement = videoRef.current;
+        if (Object.keys(headcountData).length === 0) return;
 
-        const updateHeadcount = () => {
-            if (videoElement && headcountData[selectedFeed]) {
+        const cleanupFunctions = [];
+        Object.keys(thumbVideoRefs.current).forEach(id => {
+            const videoElement = thumbVideoRefs.current[id];
+            if (!videoElement) return;
+
+            const handleTimeUpdate = () => {
                 const currentTime = videoElement.currentTime;
-                const data = headcountData[selectedFeed];
-                const currentDataPoint = data.find(point => currentTime >= point.timestamp && currentTime < point.timestamp + 0.5);
-                if (currentDataPoint) {
-                    setCurrentHeadcount(currentDataPoint.count);
+                const dataForFeed = headcountData[id];
+                if (dataForFeed) {
+                    const point = dataForFeed.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
+                    setLiveCounts(prev => ({ ...prev, [id]: point.count }));
                 }
+            };
+            videoElement.addEventListener('timeupdate', handleTimeUpdate);
+            cleanupFunctions.push(() => {
+                if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+            });
+        });
+
+        return () => cleanupFunctions.forEach(fn => fn());
+    }, [headcountData]);
+
+    // 3. Effect for updating the main video feed. Re-runs when the selected feed changes.
+    useEffect(() => {
+        const videoElement = mainVideoRef.current;
+        if (!videoElement || !headcountData[selectedFeed]) return;
+
+        const handleTimeUpdate = () => {
+            const currentTime = videoElement.currentTime;
+            const data = headcountData[selectedFeed];
+            if (data) {
+                const point = data.reduce((p, c) => (Math.abs(c.timestamp - currentTime) < Math.abs(p.timestamp - currentTime) ? c : p));
+                setLiveCounts(prev => ({ ...prev, [selectedFeed]: point.count }));
             }
         };
 
-        if (videoElement) {
-            videoElement.addEventListener('timeupdate', updateHeadcount);
-        }
-
+        videoElement.addEventListener('timeupdate', handleTimeUpdate);
         return () => {
-            if (videoElement) {
-                videoElement.removeEventListener('timeupdate', updateHeadcount);
-            }
+            if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
         };
     }, [selectedFeed, headcountData]);
 
+
     const renderSelectedFeed = () => {
         const data = cameraData[selectedFeed];
+        const currentCount = liveCounts[selectedFeed] ?? 0;
+        const capacityPercent = Math.round((currentCount / data.capacity) * 100);
+        const oxygenLevel = 20.9 - (capacityPercent / 100) * 1.5;
+        const deviceDensity = Math.round(currentCount * 1.2);
+
         return (
           <div className="main-feed-content">
-            <div className="feed-header">CAMERA FEED {selectedFeed} [LIVE]</div>
+            <div className="feed-header">CAMERA FEED {selectedFeed} ({data.name}) [LIVE]</div>
             <div className="feed-visual-placeholder">
-              <video ref={videoRef} src={data.video} autoPlay loop muted className="feed-image" />
+              <video 
+                ref={mainVideoRef} 
+                key={selectedFeed}
+                src={data.video} 
+                autoPlay 
+                loop 
+                muted 
+                className="feed-image" 
+              />
               <div className="main-feed-data-panel">
-                  <div className="data-point main"><span className="data-label">Visual Headcount</span><span className="data-value">{currentHeadcount}</span></div>
-                  <div className="data-point main"><span className="data-label">Device Density</span><span className="data-value">{data.density}</span></div>
-                  <div className="data-point main"><span className="data-label">Oxygen Level</span><span className="data-value">{data.oxygen}</span></div>
+                  <div className="data-point main"><span className="data-label">Crowd Density</span><span className="data-value">{capacityPercent}%</span></div>
+                  <div className="data-point main"><span className="data-label">Est. Oxygen</span><span className="data-value">{oxygenLevel.toFixed(1)}%</span></div>
+                  <div className="data-point main"><span className="data-label">Device Density</span><span className="data-value">~{deviceDensity}</span></div>
               </div>
             </div>
           </div>
@@ -91,23 +126,38 @@ export default function CCTVPage() {
           </div>
     
           <div className="camera-bay">
-            {Object.keys(cameraData).map(id => (
-                <div 
-                  key={id}
-                  className={`camera-thumbnail ${selectedFeed.toString() === id ? 'active' : ''}`}
-                  onClick={() => setSelectedFeed(parseInt(id, 10))}
-                >
-                  <div className="thumb-header">CAM {String(id).padStart(2, '0')}</div>
-                  <div className="thumb-visual">
-                    <video src={cameraData[id].video} autoPlay loop muted className="thumb-video" />
-                    <div className="thumb-data-panel">
-                        <div className="data-point"><span className="data-label">Vis. Headcount</span><span className="data-value">{headcountData[id] ? 'Live' : 'N/A'}</span></div>
-                        <div className="data-point"><span className="data-label">Device Density</span><span className="data-value">{cameraData[id].density}</span></div>
-                        <div className="data-point"><span className="data-label">Oxygen Level</span><span className="data-value">{cameraData[id].oxygen}</span></div>
+            {Object.keys(cameraData).map(id => {
+                const data = cameraData[id];
+                const currentCount = liveCounts[id] ?? 0;
+                const capacityPercent = Math.round((currentCount / data.capacity) * 100);
+                const oxygenLevel = 20.9 - (capacityPercent / 100) * 1.5;
+                const deviceDensity = Math.round(currentCount * 1.2);
+                
+                return (
+                    <div 
+                      key={id}
+                      className={`camera-thumbnail ${selectedFeed.toString() === id ? 'active' : ''}`}
+                      onClick={() => setSelectedFeed(parseInt(id, 10))}
+                    >
+                      <div className="thumb-header">CAM {String(id).padStart(2, '0')}</div>
+                      <div className="thumb-visual">
+                        <video 
+                            ref={el => thumbVideoRefs.current[id] = el}
+                            src={data.video} 
+                            autoPlay 
+                            loop 
+                            muted 
+                            className="thumb-video" 
+                        />
+                        <div className="thumb-data-panel">
+                            <div className="data-point"><span className="data-label">Density</span><span className="data-value">{capacityPercent}%</span></div>
+                            <div className="data-point"><span className="data-label">Oxygen</span><span className="data-value">{oxygenLevel.toFixed(1)}%</span></div>
+                            <div className="data-point"><span className="data-label">Devices</span><span className="data-value">~{deviceDensity}</span></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-            ))}
+                );
+            })}
           </div>
         </>
     );

@@ -294,3 +294,41 @@
     color: #fff;
     text-shadow: 0 0 5px rgba(68, 76, 231, 0.5);
 }
+
+  .ai-chat-panel .response-area .message.user {
+      align-self: flex-end;
+      background-color: #444ce7;
+      color: white;
+  }
+
+  .ai-chat-panel .response-area .message.oracle .message-text {
+      font-family: 'Arial', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      white-space: pre-wrap;
+      text-shadow: 0 0 5px rgba(68, 76, 231, 0.5);
+  }
+
+.cctv-panel {
+    position: relative; /* Needed for positioning child elements */
+}
+
+.live-count {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0,0,0,0.7);
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 5;
+    color: white;
+    border-left: 4px solid #00e676;
+}
+
+.live-count span {
+    font-family: 'Courier New', Courier, monospace;
+    margin-left: 8px;
+}
