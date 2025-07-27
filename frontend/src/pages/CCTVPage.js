@@ -25,7 +25,7 @@ const initialCameraData = {
     },
 };
 
-export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) {
+export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId, anomalySimulationState }) {
     const { userRole } = useAuth();
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
@@ -35,6 +35,8 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) 
     const [showAlert, setShowAlert] = useState(false);
     const [showChat, setShowChat] = useState(false);
     const [selectedFeedStats, setSelectedFeedStats] = useState({ capacityPercent: 0, oxygenLevel: 20.9, deviceDensity: 0 });
+    const [anomalyAlert, setAnomalyAlert] = useState(null);
+    const [showAtmosphericSensors, setShowAtmosphericSensors] = useState(false);
     
     const mainVideoRef = useRef(null);
     const thumbVideoRefs = useRef({});
@@ -88,6 +90,44 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) 
             }
         };
     }, [isSimulating]);
+
+    // Effect for the new multimodal anomaly simulation
+    useEffect(() => {
+        if (anomalySimulationState === 'ambiguous-smoke') {
+            // Swap video for service area (assuming it's camera 1)
+            setCameraData(prev => ({
+                ...prev,
+                1: { ...prev[1], video: '/light_smoke.mp4' }
+            }));
+            setAnomalyAlert({
+                type: 'low-priority',
+                message: 'VISUAL ANOMALY: Possible smoke detected in Service Area. Low confidence.'
+            });
+            setShowAtmosphericSensors(false);
+        } else if (anomalySimulationState === 'fire-confirmed') {
+            setAnomalyAlert({
+                type: 'high-priority',
+                message: 'ALERT UPGRADED: Fire Confirmed by Atmospheric Sensors! O2 dropping, CO detected. Confidence: 99.8%.'
+            });
+            setShowAtmosphericSensors(true);
+        } else if (anomalySimulationState === 'chimera-deployed') {
+            // Swap video for drone feed and update alert
+             setCameraData(prev => ({
+                ...prev,
+                1: { ...prev[1], name: "CHIMERA EYE 1 - LIVE", video: '/small_fire.mp4' }
+            }));
+            setAnomalyAlert({
+                type: 'high-priority',
+                message: 'FIRE CONFIRMED. DRONE ON-SCENE.'
+            });
+        } else {
+            // Reset on inactive
+            setCameraData(initialCameraData);
+            setAnomalyAlert(null);
+            setShowAtmosphericSensors(false);
+        }
+
+    }, [anomalySimulationState]);
 
     // Effect for handling video data updates (for non-simulation) and video ending
     useEffect(() => {
@@ -192,6 +232,11 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) 
                 muted 
                 className="feed-image" 
               />
+              {anomalyAlert && cameraData[selectedFeed]?.video.includes('smoke') && (
+                  <div className={`anomaly-alert ${anomalyAlert.type}`}>
+                      {anomalyAlert.message}
+                  </div>
+              )}
               <div className="main-feed-data-panel">
                   <div className="data-point main"><span className="data-label">Crowd Density</span><span className="data-value">{capacityPercent}%</span></div>
                   <div className="data-point main"><span className="data-label">Est. Oxygen</span><span className="data-value">{oxygenLevel.toFixed(1)}%</span></div>
@@ -235,6 +280,37 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) 
               setGhostProtocolScenarioId={setGhostProtocolScenarioId}
             />
           )}
+
+          {anomalySimulationState === 'echo-active' || anomalySimulationState === 'chimera-deployed' ? (
+            <div className="status-cards-container">
+                {anomalySimulationState === 'echo-active' && (
+                    <div className="status-card">
+                        <div className="card-header">PROJECT ECHO</div>
+                        <div className="card-status active">ACTIVE: Clearing Path</div>
+                    </div>
+                )}
+                {anomalySimulationState === 'chimera-deployed' && (
+                     <div className="status-card">
+                        <div className="card-header">PROJECT CHIMERA</div>
+                        <div className="card-status active">DEPLOYED: Visual Confirmed</div>
+                    </div>
+                )}
+            </div>
+          ) : null}
+
+          {showAtmosphericSensors && (
+            <div className="atmospheric-sensors-panel">
+                <div className="panel-header">ATMOSPHERIC SENSORS - SERVICE AREA</div>
+                <div className="sensor-data critical">
+                    <span className="sensor-label">OXYGEN (O2)</span>
+                    <span className="sensor-value">18.2% <span className="trend down">▼</span></span>
+                </div>
+                <div className="sensor-data critical">
+                    <span className="sensor-label">CARBON MONOXIDE (CO)</span>
+                    <span className="sensor-value">450 ppm <span className="trend up">▲</span></span>
+                </div>
+            </div>
+          )}
     
           <div className="camera-bay">
             {Object.keys(cameraData).map(id => {
@@ -263,6 +339,11 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) 
                             muted 
                             className="thumb-video" 
                         />
+                        {anomalyAlert && id === '1' && (
+                            <div className={`anomaly-alert-thumb ${anomalyAlert.type}`}>
+                                {anomalyAlert.type === 'high-priority' ? 'ALERT' : 'ANOMALY'}
+                            </div>
+                        )}
                         <div className="thumb-data-panel">
                             <div className="data-point"><span className="data-label">Density</span><span className="data-value">{capacityPercent}%</span></div>
                             <div className="data-point"><span className="data-label">Oxygen</span><span className="data-value">{oxygenLevel.toFixed(1)}%</span></div>

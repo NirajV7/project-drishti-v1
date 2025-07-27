@@ -33,7 +33,13 @@ const ZONES_CONFIG = {
   }
 };
 
-const MapViewPage = ({ simulationStatus }) => {
+const DISPATCH_ROUTE = [
+    { lat: 13.071, lng: 77.496 },
+    { lat: 13.073, lng: 77.497 },
+    { lat: 13.074, lng: 77.498 },
+];
+
+const MapViewPage = ({ simulationStatus, anomalySimulationState }) => {
   const [zones, setZones] = useState(ZONES_CONFIG);
 
   React.useEffect(() => {
@@ -71,6 +77,9 @@ const MapViewPage = ({ simulationStatus }) => {
             disableDefaultUI={true}
         >
             <Polygons zones={zones} />
+            {anomalySimulationState === 'dispatch-route' && <DispatchRoute />}
+            {anomalySimulationState === 'echo-pulse' && <EchoPulse />}
+            {anomalySimulationState === 'chimera-drones' && <ChimeraDrones />}
         </Map>
       </APIProvider>
     </div>
@@ -100,5 +109,71 @@ const Polygons = ({ zones }) => {
 
     return null;
 }
+
+const DispatchRoute = () => {
+    const map = useMap();
+    const maps = useMapsLibrary('maps');
+    const markerLib = useMapsLibrary('marker');
+
+    React.useEffect(() => {
+        if (!map || !maps || !markerLib) return;
+
+        const route = new maps.Polyline({
+            path: DISPATCH_ROUTE,
+            geodesic: true,
+            strokeColor: '#FFFF00',
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+        });
+
+        const unitMarker = new markerLib.Marker({
+            position: DISPATCH_ROUTE[0],
+            map: map,
+            title: 'Unit S-14',
+            icon: {
+                path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                scale: 6,
+                strokeColor: '#FFFF00',
+                fillColor: '#FFFF00',
+                fillOpacity: 1,
+            }
+        });
+
+        route.setMap(map);
+
+        return () => {
+            route.setMap(null);
+            unitMarker.setMap(null);
+        };
+    }, [map, maps, markerLib]);
+
+    return null;
+};
+
+const EchoPulse = () => {
+    const map = useMap();
+    if (!map) return null;
+
+    return <div className="echo-pulse-container" style={{position: 'absolute', top: '50%', left: '50%'}}><div className="echo-pulse"></div></div>;
+}
+
+const ChimeraDrones = () => {
+    const map = useMap();
+    if (!map) return null;
+
+    // Simple drone icon positions for the demo
+    const dronePositions = [
+        { lat: 13.074, lng: 77.4975 },
+        { lat: 13.073, lng: 77.4985 },
+    ];
+
+    return (
+        <>
+            {dronePositions.map((pos, i) => (
+                <div key={i} className="drone-icon" style={{position: 'absolute', top: `${50 + (i*2)}%`, left: `${50 + (i*2)}%`}}></div>
+            ))}
+        </>
+    );
+};
 
 export default MapViewPage; 

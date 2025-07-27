@@ -13,15 +13,59 @@ function ProfessionalDashboard() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [ghostProtocolScenarioId, setGhostProtocolScenarioId] = useState(1); // Default to 1
   const [simulationStatus, setSimulationStatus] = useState('active'); // 'active' or 'resolved'
+  const [anomalySimulationState, setAnomalySimulationState] = useState('inactive'); // inactive, ambiguous-smoke, fire-confirmed, dispatch-route, echo-active, chimera-deployed
+  const [showDispatchAlert, setShowDispatchAlert] = useState(false);
+
+  const handleStartAnomalySimulation = () => {
+    setActivePage('dashboard');
+    setAnomalySimulationState('ambiguous-smoke');
+    setShowDispatchAlert(false);
+    
+    // Automatically escalate the alert after a delay
+    setTimeout(() => {
+        setAnomalySimulationState('fire-confirmed');
+        // Show dispatch alert shortly after fire confirmation
+        setTimeout(() => {
+            setShowDispatchAlert(true);
+            setAnomalySimulationState('dispatch-route');
+            setActivePage('map'); // Switch to map view
+        }, 2000); // 2-second delay
+    }, 4000); // 4-second delay for demonstration
+  };
+
+  const handleResolveSimulation = () => {
+    setSimulationStatus('resolved'); // Turn map zones green
+    setShowDispatchAlert(false);
+
+    // After a delay, reset everything to the initial state
+    setTimeout(() => {
+        setAnomalySimulationState('inactive');
+        setSimulationStatus('active'); // Reset for the next simulation
+        setActivePage('dashboard');
+    }, 3000); // 3-second delay
+  };
+
+  const handleActivateEcho = () => {
+    setAnomalySimulationState('echo-active');
+  };
+
+  const handleDeployChimera = () => {
+    setAnomalySimulationState('chimera-deployed');
+    setActivePage('dashboard'); // Switch back to CCTV to see the drone feed
+  };
 
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard':
-        return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} />;
+        return <CCTVPage 
+                  setActivePage={setActivePage} 
+                  setGhostProtocolScenarioId={setGhostProtocolScenarioId}
+                  anomalySimulationState={anomalySimulationState}
+               />;
       case 'ghost':
         return <GhostProtocolPage ghostProtocolScenarioId={ghostProtocolScenarioId} setGhostProtocolScenarioId={setGhostProtocolScenarioId} />;
       case 'map':
-        return <MapViewPage simulationStatus={simulationStatus} />;
+        return <MapViewPage simulationStatus={simulationStatus} anomalySimulationState={anomalySimulationState} />;
       case 'users':
         return <UserManagementPage />;
       case 'audit':
@@ -65,9 +109,29 @@ function ProfessionalDashboard() {
             <h1>Visual Command Center</h1>
             <p>Real-time CCTV Monitoring</p>
             <div>
-              <button className="consult-ai-button" onClick={() => setSimulationStatus('resolved')}>
-                Resolve Simulation
-              </button>
+              {anomalySimulationState === 'inactive' ? (
+                <button className="consult-ai-button" onClick={handleStartAnomalySimulation}>
+                  Simulate Anomaly
+                </button>
+              ) : (
+                <button className="consult-ai-button" onClick={handleResolveSimulation}>
+                  Resolve Simulation
+                </button>
+              )}
+
+              {(anomalySimulationState === 'dispatch-route' || anomalySimulationState === 'echo-active') && (
+                <>
+                  <button 
+                    className="consult-ai-button" 
+                    onClick={handleActivateEcho} 
+                    disabled={anomalySimulationState !== 'dispatch-route'}
+                  >
+                    Activate Project Echo
+                  </button>
+                  <button className="consult-ai-button" onClick={handleDeployChimera}>Deploy Project Chimera</button>
+                </>
+              )}
+              
               <button className="consult-ai-button" onClick={() => setIsChatOpen(true)}>
                 <i className="fas fa-brain"></i> Consult AI Oracle
               </button>
@@ -76,6 +140,14 @@ function ProfessionalDashboard() {
 
           <div className="visual-layout">
             {renderContent()}
+            {showDispatchAlert && (
+                <div className="dispatch-alert">
+                    <span>
+                        AUTOMATED DISPATCH: Agent built with Vertex AI Agent Builder has dispatched nearest security unit (S-14). Route displayed on map.
+                    </span>
+                    <button className="close-alert-button" onClick={() => setShowDispatchAlert(false)}>&times;</button>
+                </div>
+            )}
           </div>
         </main>
         {isChatOpen && 

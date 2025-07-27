@@ -339,3 +339,163 @@
     height: 100%;
     width: 100%;
 }
+
+/* Anomaly Simulation Styles */
+.anomaly-alert {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    z-index: 10;
+    text-align: center;
+    background-color: rgba(0,0,0,0.8);
+    transition: all 0.3s ease-in-out;
+}
+
+.anomaly-alert.low-priority {
+    border: 2px solid #ffd600; /* Yellow */
+    color: #ffd600;
+}
+
+.anomaly-alert.high-priority {
+    border: 2px solid #ff4d4d; /* Red */
+    color: #ff4d4d;
+    font-size: 18px; /* More prominent */
+}
+
+.anomaly-alert-thumb {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.anomaly-alert-thumb.low-priority {
+    background-color: #ffd600;
+    color: #000;
+}
+
+.anomaly-alert-thumb.high-priority {
+    background-color: #ff4d4d;
+    color: #fff;
+}
+
+
+.atmospheric-sensors-panel {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.atmospheric-sensors-panel .panel-header {
+    font-weight: bold;
+    color: #c9d1d9;
+    margin-bottom: 10px;
+}
+
+.sensor-data {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.sensor-data.critical .sensor-label {
+    color: #ff4d4d;
+}
+
+.sensor-data.critical .sensor-value {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.sensor-value .trend {
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.sensor-value .trend.down {
+    color: #ff4d4d;
+}
+
+.sensor-value .trend.up {
+    color: #ff4d4d;
+}
+
+.dispatch-alert {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0d8eff; /* Bright Blue */
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 2000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close-alert-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    line-height: 1;
+    padding: 0 0 0 15px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.close-alert-button:hover {
+    opacity: 1;
+}
+
+/* Echo & Chimera Styles */
+.status-cards-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.status-card {
+    flex: 1;
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    padding: 15px;
+}
+
+.card-header {
+    font-weight: bold;
+    color: #c9d1d9;
+    margin-bottom: 10px;
+}
+
+.card-status.active {
+    color: #0d8eff;
+    font-weight: bold;
+}
+
+.echo-pulse-container {
+    /* ... styles for echo pulse ... */
+}
+.echo-pulse {
+    /* ... styles for echo pulse animation ... */
+}
+.drone-icon {
+    /* ... styles for drone icon ... */
+}
