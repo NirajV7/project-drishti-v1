@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { APIProvider, Map, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import './ProfessionalDashboard.css';
 
-const API_KEY = "AIzaSyDOCireVjGcMsogwraXrWDsfiOjUUOVuWs";
+const API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your key
 const BIEC_CENTER = { lat: 13.0748, lng: 77.4952 };
 
 // More accurate coordinates for BIEC Halls
@@ -38,8 +38,18 @@ const DISPATCH_ROUTE = [
     { lat: 13.073, lng: 77.497 },
     { lat: 13.074, lng: 77.498 },
 ];
+const KOSH_VECTOR_PATH = [
+    { lat: 13.0760, lng: 77.4940 },
+    { lat: 13.0755, lng: 77.4965 },
+    { lat: 13.0740, lng: 77.4970 },
+    { lat: 13.0735, lng: 77.4950 } // Discovery point
+];
+const STAFF_DISPATCH_PATH = [
+    { lat: 13.0725, lng: 77.4980 }, // Start point for staff
+    { lat: 13.0735, lng: 77.4950 }  // End point (backpack location)
+];
 
-const MapViewPage = ({ simulationStatus, anomalySimulationState }) => {
+const MapViewPage = ({ simulationStatus, anomalySimulationState, koshState }) => {
   const [zones, setZones] = useState(ZONES_CONFIG);
 
   React.useEffect(() => {
@@ -78,10 +88,17 @@ const MapViewPage = ({ simulationStatus, anomalySimulationState }) => {
         >
             <Polygons zones={zones} />
             {anomalySimulationState === 'dispatch-route' && <DispatchRoute />}
-            {anomalySimulationState === 'echo-pulse' && <EchoPulse />}
-            {anomalySimulationState === 'chimera-drones' && <ChimeraDrones />}
+            {koshState === 'searching' && <KoshSearchAnimation />}
+            {koshState === 'located' && <KoshDiscovery />}
+            {(koshState === 'dispatched' || koshState === 'complete') && <KoshStaffDispatch />}
         </Map>
       </APIProvider>
+      {koshState === 'located' && (
+          <div className="backpack-video-feed">
+              <div className="panel-header">ITEM LOCATED: G-45</div>
+              <video src="/backpack_found.mp4" autoPlay loop muted />
+          </div>
+      )}
     </div>
   );
 };
@@ -174,6 +191,100 @@ const ChimeraDrones = () => {
             ))}
         </>
     );
+};
+
+const KoshSearchAnimation = () => {
+    const map = useMap();
+    const maps = useMapsLibrary('maps');
+
+    useEffect(() => {
+        if (!map || !maps) return;
+
+        const vectorPath = new maps.Polyline({
+            path: KOSH_VECTOR_PATH,
+            geodesic: true,
+            strokeColor: '#FFFF00',
+            strokeOpacity: 0.8,
+            strokeWeight: 6,
+        });
+
+        vectorPath.setMap(map);
+        // In a real app, the scanning animation would be more complex
+        // For this demo, the path itself represents the search
+        
+        return () => { vectorPath.setMap(null); };
+    }, [map, maps]);
+
+    return null;
+};
+
+const KoshDiscovery = () => {
+    const map = useMap();
+    const markerLib = useMapsLibrary('marker');
+
+    useEffect(() => {
+        if (!map || !markerLib) return;
+
+        const discoveryMarker = new markerLib.Marker({
+            position: KOSH_VECTOR_PATH[KOSH_VECTOR_PATH.length - 1],
+            map: map,
+            title: 'Backpack Located',
+            icon: {
+                path: 'M 0, -1 L 0.5878, -0.809 L 0.9511, -0.309 L 0.9511, 0.309 L 0.5878, 0.809 L 0, 1 L -0.5878, 0.809 L -0.9511, 0.309 L -0.9511, -0.309 L -0.5878, -0.809 Z',
+                fillColor: '#FFD700',
+                fillOpacity: 1,
+                strokeWeight: 1,
+                strokeColor: '#FFFFFF',
+                scale: 25,
+            },
+        });
+
+        return () => { discoveryMarker.setMap(null); };
+    }, [map, markerLib]);
+
+    return null;
+};
+
+const KoshStaffDispatch = () => {
+    const map = useMap();
+    const maps = useMapsLibrary('maps');
+    const markerLib = useMapsLibrary('marker');
+
+    useEffect(() => {
+        if (!map || !maps || !markerLib) return;
+
+        const staffPath = new maps.Polyline({
+            path: STAFF_DISPATCH_PATH,
+            geodesic: true,
+            strokeColor: '#1890ff',
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+        });
+
+        const staffMarker = new markerLib.Marker({
+            position: STAFF_DISPATCH_PATH[0],
+            map: map,
+            title: 'Staff E-38',
+            // Simple dot icon for staff
+            icon: {
+                path: 'M -1, 0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0',
+                fillColor: '#1890ff',
+                fillOpacity: 1,
+                strokeWeight: 0,
+                scale: 8,
+            },
+        });
+
+        staffPath.setMap(map);
+        staffMarker.setMap(map);
+
+        return () => {
+            staffPath.setMap(null);
+            staffMarker.setMap(null);
+        };
+    }, [map, maps, markerLib]);
+
+    return null;
 };
 
 export default MapViewPage; 

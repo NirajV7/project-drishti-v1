@@ -12,10 +12,22 @@ const SimulationsPage = ({
     handleSimulateDistressAndFollower, // New handler
     handleActivateGuardianNetwork, // New handler
     handleDeployKiliDrone, // New handler
+    handleStartKoshSimulation, // New handler for Project Kosh
 }) => {
     return (
         <div className="simulations-control-panel">
             <div className="panel-header">ADMIN SIMULATION CONTROLS</div>
+            <div className="simulation-group">
+                <h3>Project Kosh (AI Lost & Found)</h3>
+                <p>Demonstrates an AI-powered, privacy-preserving search and recovery for lost items.</p>
+                <button 
+                    className="admin-button" 
+                    onClick={handleStartKoshSimulation}
+                    disabled={anomalySimulationState !== 'inactive'}
+                >
+                    Start Lost Item Simulation
+                </button>
+            </div>
             <div className="simulation-group">
                 <h3>The Guardian Network</h3>
                 <p>Demonstrates proactive alerts and community-assisted response for a personal crisis.</p>

@@ -662,6 +662,25 @@
     object-fit: cover;
 }
 
+.kosh-alert {
+    background-color: #1890ff; /* A different blue for Kosh alerts */
+}
+
+.backpack-video-feed {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    border: 2px solid #FFD700;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    z-index: 1500;
+}
+
+.backpack-video-feed video {
+    width: 100%;
+    height: auto;
+}
+
 .biometric-panel {
     border: 2px solid #ff4d4d;
 }
@@ -737,4 +756,52 @@
 
 .soundscape-panel.distress .soundscape-status {
     color: #ff4d4d;
+}
+
+/* Arjun's App (Project Kosh) Styles */
+.lost-item-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4b5563;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+}
+
+.app-confirmation {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.app-confirmation .app-alert-title {
+    color: #096dd9;
+}
+
+.app-good-news {
+    background-color: #f6ffed;
+    border-color: #b7eb8f;
+}
+
+.app-good-news .app-alert-title {
+    color: #389e0d;
 }
