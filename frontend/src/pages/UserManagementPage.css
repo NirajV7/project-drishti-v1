@@ -1,0 +1,94 @@
+.user-management-page {
+    width: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.actions-bar {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.add-user-btn {
+    padding: 12px 24px;
+    background: linear-gradient(90deg, #444ce7, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.user-table-container {
+    background-color: #161b22;
+    border-radius: 16px;
+    border: 1px solid #30363d;
+    overflow: hidden;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th, .user-table td {
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+}
+
+.user-table th {
+    background-color: #0d1117;
+    color: #8b949e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.user-info .user-name {
+    display: block;
+    font-weight: 600;
+    color: #c9d1d9;
+}
+
+.user-info .user-email {
+    font-size: 0.9rem;
+    color: #8b949e;
+}
+
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-pill.active {
+    background-color: rgba(3, 201, 136, 0.2);
+    color: #03c988;
+}
+
+.status-pill.inactive {
+    background-color: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-color: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+}
+
+.action-btn.delete {
+    color: #f85149;
+} 

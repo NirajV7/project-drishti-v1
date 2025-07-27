@@ -1,0 +1,48 @@
+.audit-log-page {
+    width: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.log-table-container {
+    background-color: #161b22;
+    border-radius: 16px;
+    border: 1px solid #30363d;
+    overflow: hidden;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.log-table th, .log-table td {
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+    color: #c9d1d9;
+}
+
+.log-table th {
+    background-color: #0d1117;
+    color: #8b949e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.log-table .action-cell {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.95rem;
+}
+
+.log-status {
+    font-weight: 600;
+}
+
+.log-status.completed, .log-status.success {
+    color: #03c988;
+}
+
+.log-status.critical {
+    color: #f85149;
+} 

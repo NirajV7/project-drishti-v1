@@ -22,7 +22,7 @@ function App() {
 }
 
 function AppRoutes() {
-  const { currentUser } = useAuth();
+  const { currentUser, userRole } = useAuth();
 
   return (
     <Routes>
@@ -30,7 +30,16 @@ function AppRoutes() {
       <Route path="/home" element={currentUser ? <HomePage /> : <Navigate to="/login" />} />
       <Route path="/about" element={currentUser ? <AboutPage /> : <Navigate to="/login" />} />
       <Route path="/contact" element={currentUser ? <ContactPage /> : <Navigate to="/login" />} />
-      <Route path="/dashboard" element={currentUser ? <ProfessionalDashboard /> : <Navigate to="/login" />} />
+      <Route 
+        path="/dashboard" 
+        element={
+          currentUser && (userRole === 'admin' || userRole === 'commandor') ? (
+            <ProfessionalDashboard />
+          ) : (
+            <Navigate to="/home" />
+          )
+        } 
+      />
       
       {/* Auth routes with shared layout */}
       <Route element={<AuthPage />}>
@@ -43,6 +52,5 @@ function AppRoutes() {
     </Routes>
   );
 }
-
 
 export default App;

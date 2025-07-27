@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../AuthContext'; // Correct path to AuthContext
 import './Auth.css';
 
 function StaffLoginForm() {
-  const [staffId, setStaffId] = useState('');
-  const [staffPassword, setStaffPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    if (!staffId || !staffPassword) {
-      setError('Please enter your Service ID and password.');
-    } else {
-      setError('');
-      alert('Staff login successful! (Demo only)');
+    try {
+      const { role } = await login(email, password);
+      if (role === 'admin' || role === 'commandor') {
+        navigate('/dashboard');
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      setError('Failed to log in. Please check your credentials.');
     }
   };
 
@@ -23,16 +30,16 @@ function StaffLoginForm() {
       <div className="registration-form-title">Staff / Security Login</div>
       <input
         className="registration-input"
-        type="text"
-        value={staffId}
-        onChange={e => setStaffId(e.target.value)}
-        placeholder="Service ID or Username"
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Email Address"
         required
       />
       <input
         className="registration-input"
         type="password"
-        value={staffPassword}
+        value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
         required

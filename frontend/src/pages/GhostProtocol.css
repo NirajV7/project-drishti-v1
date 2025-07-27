@@ -1,0 +1,120 @@
+.main-feed-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.combined-simulation {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 10px;
+    padding: 10px;
+    background: #0d1117;
+    border-radius: 8px;
+    height: 100%;
+}
+
+.zone-container-main {
+    flex-grow: 3; /* Takes more space */
+    position: relative;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.zone-container-secondary {
+    flex-grow: 2;
+    display: flex;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.simulation-zone {
+    flex: 1;
+    position: relative;
+    background-color: #161b22;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+    width: 100%;
+    height: 100%;
+}
+
+.vector {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(162, 155, 254, 0.8);
+    box-shadow: 0 0 6px rgba(162, 155, 254, 0.6);
+}
+
+.zone-indicator.static {
+    position: absolute;
+    left: 50%;
+    top: 15px;
+    transform: translateX(-50%);
+    z-index: 10;
+    background-color: rgba(13, 17, 23, 0.7);
+    border: none;
+    color: #8b949e;
+    font-size: 0.9rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.thumb-data-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(13, 17, 23, 0.9), transparent);
+    padding: 16px 8px 8px 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.thumb-data-panel .data-point {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #e6edf3;
+}
+
+.thumb-data-panel .data-label {
+    font-size: 0.7rem;
+    color: #8b949e;
+    margin-bottom: 2px;
+}
+
+.thumb-data-panel .data-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.sim-notification-toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(68, 76, 231, 0.9);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 100;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(68, 76, 231, 0.4);
+    border: 1px solid #8b5cf6;
+    animation: fadeInOut 5s forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translate(-50%, 20px); }
+    15% { opacity: 1; transform: translate(-50%, 0); }
+    85% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -20px); }
+} 
