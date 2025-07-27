@@ -8,6 +8,11 @@ import SettingsPage from './SettingsPage';
 import UserManagementPage from './UserManagementPage';
 import AuditLogPage from './AuditLogPage';
 import SimulationsPage from './SimulationsPage';
+import PriyasAppPanel from './PriyasAppPanel'; // Import the new panel
+import SoundscapePanel from './SoundscapePanel'; // Import the new panel
+import BiometricPanel from './BiometricPanel'; // Import the new panel
+import GuardianAppPanel from './GuardianAppPanel'; // Import the new panel
+import DroneAnimation from './DroneAnimation'; // Import the new component
 
 function ProfessionalDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -17,6 +22,22 @@ function ProfessionalDashboard() {
   const [anomalySimulationState, setAnomalySimulationState] = useState('inactive'); // inactive, ambiguous-smoke, fire-confirmed, dispatch-route, echo-active, chimera-deployed, summary-open
   const [showDispatchAlert, setShowDispatchAlert] = useState(false);
   const [summaryContext, setSummaryContext] = useState('');
+
+  // States for the new Guardian Network Simulation
+  const [guardianSimulationState, setGuardianSimulationState] = useState('inactive'); // inactive, lost-child, sonic-shield, guiding-mother, distress-follower, guardian-active, drone-active
+  const [showPriyasApp, setShowPriyasApp] = useState(false);
+  const [showSoundscape, setShowSoundscape] = useState(false);
+  const [isDistress, setIsDistress] = useState(false); // New state for distress variation
+  const [showBiometrics, setShowBiometrics] = useState(false);
+  const [showGuardianApp, setShowGuardianApp] = useState(false);
+  const [isKiliDroneActive, setIsKiliDroneActive] = useState(false);
+  const [showDroneAnimation, setShowDroneAnimation] = useState(false);
+
+  const handleStartGuardianSimulation = () => {
+    setGuardianSimulationState('lost-child');
+    setShowPriyasApp(true);
+    // No longer redirecting to the dashboard, so the admin stays on the simulations page
+  };
 
   const handleStartAnomalySimulation = () => {
     setActivePage('dashboard');
@@ -81,6 +102,37 @@ function ProfessionalDashboard() {
     setActivePage('dashboard');
   };
 
+  const handleActivateGuardianNetwork = () => {
+    setShowGuardianApp(true);
+    setGuardianSimulationState('guardian-active');
+  };
+
+  const handleDeployKiliDrone = () => {
+    setShowDroneAnimation(true); // Start the animation
+  };
+
+  const handleDroneAnimationEnd = () => {
+    setShowDroneAnimation(false); // Hide animation
+    setIsKiliDroneActive(true); // Show drone feed
+    setGuardianSimulationState('drone-active');
+  };
+
+  const handleSimulateDistressAndFollower = () => {
+    setShowBiometrics(true);
+    setGuardianSimulationState('distress-follower');
+  };
+
+  const handleTaskSonicShield = (distress) => {
+    setShowSoundscape(true);
+    setIsDistress(distress);
+    setGuardianSimulationState('sonic-shield');
+  };
+
+  const handleGuidePriya = () => {
+    setGuardianSimulationState('guiding-mother');
+    // The video playback is handled within PriyasAppPanel now
+  };
+
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard':
@@ -88,6 +140,7 @@ function ProfessionalDashboard() {
                   setActivePage={setActivePage} 
                   setGhostProtocolScenarioId={setGhostProtocolScenarioId}
                   anomalySimulationState={anomalySimulationState}
+                  isKiliDroneActive={isKiliDroneActive}
                />;
       case 'ghost':
         return <GhostProtocolPage ghostProtocolScenarioId={ghostProtocolScenarioId} setGhostProtocolScenarioId={setGhostProtocolScenarioId} />;
@@ -105,9 +158,14 @@ function ProfessionalDashboard() {
                     handleResolveSimulation={handleResolveSimulation}
                     anomalySimulationState={anomalySimulationState}
                     handleCrowdIncrease={() => { /* Placeholder for crowd sim */ }}
+                    handleStartGuardianSimulation={handleStartGuardianSimulation}
+                    handleTaskSonicShield={handleTaskSonicShield} // Pass the new handler
+                    handleSimulateDistressAndFollower={handleSimulateDistressAndFollower} // Pass the new handler
+                    handleActivateGuardianNetwork={handleActivateGuardianNetwork} // Pass the new handler
+                    handleDeployKiliDrone={handleDeployKiliDrone} // Pass the new handler
                 />;
       default:
-        return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} anomalySimulationState={anomalySimulationState} />;
+        return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} anomalySimulationState={anomalySimulationState} isKiliDroneActive={isKiliDroneActive} />;
     }
   };
 
@@ -174,7 +232,18 @@ function ProfessionalDashboard() {
           <div className="visual-layout">
             {renderContent()}
           </div>
+          
+          {/* Floating Panels Area */}
+          <div className="floating-panels-area">
+            {showPriyasApp && <PriyasAppPanel onGuideMeClick={handleGuidePriya} onClose={() => setShowPriyasApp(false)} />}
+            {showGuardianApp && <GuardianAppPanel onClose={() => setShowGuardianApp(false)} />}
+            {showSoundscape && <SoundscapePanel isDistress={isDistress} onClose={() => setShowSoundscape(false)} />}
+            {showBiometrics && <BiometricPanel onClose={() => setShowBiometrics(false)} />}
+          </div>
         </main>
+        
+        {showDroneAnimation && <DroneAnimation onAnimationEnd={handleDroneAnimationEnd} />}
+        
         {isChatOpen && 
             <AIChatPanel 
                 context={summaryContext || "General inquiry."} 

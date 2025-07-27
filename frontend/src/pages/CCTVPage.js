@@ -25,7 +25,7 @@ const initialCameraData = {
     },
 };
 
-export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId, anomalySimulationState }) {
+export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId, anomalySimulationState, isKiliDroneActive }) {
     const { userRole } = useAuth();
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
@@ -41,6 +41,22 @@ export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId, an
     const mainVideoRef = useRef(null);
     const thumbVideoRefs = useRef({});
     const simulationIntervalRef = useRef(null);
+
+    useEffect(() => {
+        if (isKiliDroneActive) {
+            setCameraData(prev => ({
+                ...prev,
+                '4': {
+                    id: '4',
+                    name: 'KILI DRONE - LIVE',
+                    video: '/kili_drone_feed.mp4',
+                    data: null, // No crowd data for the drone
+                    capacity: 0,
+                }
+            }));
+            setSelectedFeed('4'); // Switch to the drone feed
+        }
+    }, [isKiliDroneActive]);
 
     // Fetch initial data for all cameras or reset to it
     useEffect(() => {

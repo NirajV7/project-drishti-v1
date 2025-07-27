@@ -6,11 +6,44 @@ const SimulationsPage = ({
     handleStartAnomalySimulation,
     handleResolveSimulation,
     anomalySimulationState,
-    handleCrowdIncrease, // Assuming a function for the other simulation
+    handleCrowdIncrease,
+    handleStartGuardianSimulation, // New handler for the Guardian Network
+    handleTaskSonicShield, // New handler
+    handleSimulateDistressAndFollower, // New handler
+    handleActivateGuardianNetwork, // New handler
+    handleDeployKiliDrone, // New handler
 }) => {
     return (
         <div className="simulations-control-panel">
             <div className="panel-header">ADMIN SIMULATION CONTROLS</div>
+            <div className="simulation-group">
+                <h3>The Guardian Network</h3>
+                <p>Demonstrates proactive alerts and community-assisted response for a personal crisis.</p>
+                <button 
+                    className="admin-button" 
+                    onClick={handleStartGuardianSimulation}
+                    disabled={anomalySimulationState !== 'inactive'}
+                >
+                    Start Guardian Simulation
+                </button>
+                <div className="simulation-variation">
+                    <h4>Step 2: Task Sonic Shield</h4>
+                    <button className="admin-button" onClick={() => handleTaskSonicShield(false)}>Listen (No Distress)</button>
+                    <button className="admin-button" onClick={() => handleTaskSonicShield(true)}>Listen (Distress Detected)</button>
+                </div>
+                <div className="simulation-variation">
+                    <h4>Step 4: Simulate Hidden Threat</h4>
+                    <button className="admin-button" onClick={handleSimulateDistressAndFollower}>Simulate Distress & Follower</button>
+                </div>
+                <div className="simulation-variation">
+                    <h4>Step 5: Activate Community Response</h4>
+                    <button className="admin-button" onClick={handleActivateGuardianNetwork}>Activate Guardian Network</button>
+                </div>
+                <div className="simulation-variation">
+                    <h4>Step 6: Deploy Companion Drone</h4>
+                    <button className="admin-button" onClick={handleDeployKiliDrone}>Deploy Kili Companion Drone</button>
+                </div>
+            </div>
             <div className="simulation-group">
                 <h3>Multimodal Anomaly Scenario</h3>
                 <p>Demonstrates autonomous threat verification and response.</p>
