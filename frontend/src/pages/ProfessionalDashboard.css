@@ -499,3 +499,55 @@
 .drone-icon {
     /* ... styles for drone icon ... */
 }
+
+/* Simulations Control Panel */
+.simulations-control-panel {
+    padding: 20px;
+    background-color: #0d1117;
+    height: 100%;
+}
+
+.simulation-group {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.simulation-group h3 {
+    margin-top: 0;
+    color: #c9d1d9;
+}
+
+.simulation-group p {
+    color: #8b949e;
+    font-size: 14px;
+}
+
+.admin-button {
+    background-color: #238636;
+    color: white;
+    border: 1px solid rgba(240, 246, 252, 0.1);
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.admin-button:hover {
+    background-color: #2ea043;
+}
+
+.admin-button:disabled {
+    background-color: #30363d;
+    cursor: not-allowed;
+}
+
+.resolve-button {
+    background-color: #c93c37 !important; /* Important to override general button styles */
+}
+
+.resolve-button:hover {
+    background-color: #da4944 !important;
+}

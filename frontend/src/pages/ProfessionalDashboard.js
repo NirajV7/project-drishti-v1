@@ -7,14 +7,16 @@ import MapViewPage from './MapViewPage';
 import SettingsPage from './SettingsPage';
 import UserManagementPage from './UserManagementPage';
 import AuditLogPage from './AuditLogPage';
+import SimulationsPage from './SimulationsPage';
 
 function ProfessionalDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [ghostProtocolScenarioId, setGhostProtocolScenarioId] = useState(1); // Default to 1
   const [simulationStatus, setSimulationStatus] = useState('active'); // 'active' or 'resolved'
-  const [anomalySimulationState, setAnomalySimulationState] = useState('inactive'); // inactive, ambiguous-smoke, fire-confirmed, dispatch-route, echo-active, chimera-deployed
+  const [anomalySimulationState, setAnomalySimulationState] = useState('inactive'); // inactive, ambiguous-smoke, fire-confirmed, dispatch-route, echo-active, chimera-deployed, summary-open
   const [showDispatchAlert, setShowDispatchAlert] = useState(false);
+  const [summaryContext, setSummaryContext] = useState('');
 
   const handleStartAnomalySimulation = () => {
     setActivePage('dashboard');
@@ -34,15 +36,17 @@ function ProfessionalDashboard() {
   };
 
   const handleResolveSimulation = () => {
-    setSimulationStatus('resolved'); // Turn map zones green
+    setSummaryContext(
+        "EVENT SUMMARY:\n- Visual anomaly (smoke) detected in Service Area.\n" +
+        "- Threat confirmed by atmospheric sensors (O2 drop, CO spike).\n" +
+        "- Autonomous dispatch of Unit S-14 initiated.\n" +
+        "- Project Echo activated to clear path.\n" +
+        "- Project Chimera deployed for on-scene visual confirmation.\n" +
+        "SITUATION UNDER CONTROL. Ready for your command."
+    );
+    setIsChatOpen(true);
+    setAnomalySimulationState('summary-open');
     setShowDispatchAlert(false);
-
-    // After a delay, reset everything to the initial state
-    setTimeout(() => {
-        setAnomalySimulationState('inactive');
-        setSimulationStatus('active'); // Reset for the next simulation
-        setActivePage('dashboard');
-    }, 3000); // 3-second delay
   };
 
   const handleActivateEcho = () => {
@@ -52,6 +56,29 @@ function ProfessionalDashboard() {
   const handleDeployChimera = () => {
     setAnomalySimulationState('chimera-deployed');
     setActivePage('dashboard'); // Switch back to CCTV to see the drone feed
+
+    // After a short delay, open the AI summary
+    setTimeout(() => {
+        setSummaryContext(
+            "EVENT SUMMARY:\n- Visual anomaly (smoke) detected in Service Area.\n" +
+            "- Threat confirmed by atmospheric sensors (O2 drop, CO spike).\n" +
+            "- Autonomous dispatch of Unit S-14 initiated.\n" +
+            "- Project Echo activated to clear path.\n" +
+            "- Project Chimera deployed for on-scene visual confirmation.\n" +
+            "SITUATION UNDER CONTROL. Ready for your command."
+        );
+        setIsChatOpen(true);
+        setAnomalySimulationState('summary-open');
+    }, 2000); // 2-second delay
+  };
+
+  const handleCloseSummaryAndReset = () => {
+    setIsChatOpen(false);
+    setSummaryContext('');
+    // Truly reset the simulation state
+    setAnomalySimulationState('inactive');
+    setSimulationStatus('active');
+    setActivePage('dashboard');
   };
 
   const renderContent = () => {
@@ -72,8 +99,15 @@ function ProfessionalDashboard() {
         return <AuditLogPage />;
       case 'settings':
         return <SettingsPage />;
+      case 'simulations':
+        return <SimulationsPage 
+                    handleStartAnomalySimulation={handleStartAnomalySimulation}
+                    handleResolveSimulation={handleResolveSimulation}
+                    anomalySimulationState={anomalySimulationState}
+                    handleCrowdIncrease={() => { /* Placeholder for crowd sim */ }}
+                />;
       default:
-        return <CCTVPage />;
+        return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} anomalySimulationState={anomalySimulationState} />;
     }
   };
 
@@ -81,9 +115,9 @@ function ProfessionalDashboard() {
     <div className="pd-body">
       <div className="pd-container">
         <aside className="pd-sidebar">
-            <div className="pd-logo">
-                <img src="" alt="Drishti Logo" />
-                <span>DRISHTI</span>
+            <div className="pd-branding">
+                
+                <h2 className="pd-title">Drishti V1</h2>
             </div>
             <nav className="pd-nav">
                 <a href="#dashboard" className={`pd-nav-item${activePage === 'dashboard' ? ' active' : ''}`} onClick={() => setActivePage('dashboard')}>Dashboard</a>
@@ -91,16 +125,12 @@ function ProfessionalDashboard() {
                 <a href="#map" className={`pd-nav-item${activePage === 'map' ? ' active' : ''}`} onClick={() => setActivePage('map')}>Map View</a>
                 <a href="#users" className={`pd-nav-item${activePage === 'users' ? ' active' : ''}`} onClick={() => setActivePage('users')}>User Management</a>
                 <a href="#audit" className={`pd-nav-item${activePage === 'audit' ? ' active' : ''}`} onClick={() => setActivePage('audit')}>Audit Log</a>
+                <a href="#simulations" className={`pd-nav-item${activePage === 'simulations' ? ' active' : ''}`} onClick={() => setActivePage('simulations')}>Simulations</a>
                 <a href="#settings" className={`pd-nav-item${activePage === 'settings' ? ' active' : ''}`} onClick={() => setActivePage('settings')}>Settings</a>
             </nav>
             <div className="sidebar-footer">
-                <div className="user-profile">
-                    <div className="user-avatar">JD</div>
-                    <div className="user-profile-info">
-                        <span className="user-name">John Doe</span>
-                        <span className="user-role">Administrator</span>
-                    </div>
-                </div>
+                <p>Version 2.1.0</p>
+                <p>&copy; 2024 Drishti Systems</p>
             </div>
         </aside>
 
@@ -109,27 +139,23 @@ function ProfessionalDashboard() {
             <h1>Visual Command Center</h1>
             <p>Real-time CCTV Monitoring</p>
             <div>
-              {anomalySimulationState === 'inactive' ? (
-                <button className="consult-ai-button" onClick={handleStartAnomalySimulation}>
-                  Simulate Anomaly
+              {anomalySimulationState !== 'inactive' && anomalySimulationState !== 'summary-open' ? (
+                <button className="consult-ai-button resolve-button" onClick={handleResolveSimulation}>
+                  End Simulation & Get Summary
                 </button>
-              ) : (
-                <button className="consult-ai-button" onClick={handleResolveSimulation}>
-                  Resolve Simulation
-                </button>
-              )}
+              ) : null}
 
               {(anomalySimulationState === 'dispatch-route' || anomalySimulationState === 'echo-active') && (
-                <>
-                  <button 
-                    className="consult-ai-button" 
-                    onClick={handleActivateEcho} 
-                    disabled={anomalySimulationState !== 'dispatch-route'}
-                  >
-                    Activate Project Echo
-                  </button>
-                  <button className="consult-ai-button" onClick={handleDeployChimera}>Deploy Project Chimera</button>
-                </>
+                 <>
+                   <button 
+                     className="consult-ai-button" 
+                     onClick={handleActivateEcho} 
+                     disabled={anomalySimulationState !== 'dispatch-route'}
+                   >
+                     Activate Project Echo
+                   </button>
+                   <button className="consult-ai-button" onClick={handleDeployChimera}>Deploy Project Chimera</button>
+                 </>
               )}
               
               <button className="consult-ai-button" onClick={() => setIsChatOpen(true)}>
@@ -138,22 +164,21 @@ function ProfessionalDashboard() {
             </div>
           </header>
 
+          {showDispatchAlert && (
+            <div className="dispatch-alert">
+              <span>AUTOMATED DISPATCH: Agent built with Vertex AI Agent Builder has dispatched nearest security unit (S-14). Route displayed on map.</span>
+              <button className="close-alert-button" onClick={() => setShowDispatchAlert(false)}>&times;</button>
+            </div>
+          )}
+
           <div className="visual-layout">
             {renderContent()}
-            {showDispatchAlert && (
-                <div className="dispatch-alert">
-                    <span>
-                        AUTOMATED DISPATCH: Agent built with Vertex AI Agent Builder has dispatched nearest security unit (S-14). Route displayed on map.
-                    </span>
-                    <button className="close-alert-button" onClick={() => setShowDispatchAlert(false)}>&times;</button>
-                </div>
-            )}
           </div>
         </main>
         {isChatOpen && 
             <AIChatPanel 
-                context="General inquiry." 
-                onClose={() => setIsChatOpen(false)} 
+                context={summaryContext || "General inquiry."} 
+                onClose={anomalySimulationState === 'summary-open' ? handleCloseSummaryAndReset : () => setIsChatOpen(false)} 
                 setActivePage={setActivePage}
                 setGhostProtocolScenarioId={setGhostProtocolScenarioId}
             />}

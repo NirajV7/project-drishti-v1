@@ -50,12 +50,18 @@ function AIChatPanel({ context, onClose, setActivePage, setGhostProtocolScenario
     });
     setChat(initialChat);
     
-    setMessages([
-      {
-        sender: 'ai',
-        text: "I have analyzed the predictive alert regarding a high-density bottleneck. I have the live data feed. How can I assist you?"
-      }
-    ]);
+    // If a specific context (like the summary) is passed, display it immediately.
+    // Otherwise, show the default greeting.
+    if (context && context !== "General inquiry.") {
+        setMessages([{ sender: 'ai', text: context }]);
+    } else {
+        setMessages([
+          {
+            sender: 'ai',
+            text: "I have analyzed the predictive alert regarding a high-density bottleneck. I have the live data feed. How can I assist you?"
+          }
+        ]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
 
