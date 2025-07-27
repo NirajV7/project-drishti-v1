@@ -681,6 +681,51 @@
     height: auto;
 }
 
+/* Akashic (BI Dashboard) Styles */
+.akashic-processing-overlay {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #0d1117;
+    color: white;
+}
+
+.akashic-dashboard {
+    padding: 20px;
+}
+
+.akashic-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.akashic-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+}
+
+.akashic-panel {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+}
+
+.akashic-panel.large {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+}
+
+.akashic-panel img {
+    width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
 .biometric-panel {
     border: 2px solid #ff4d4d;
 }
@@ -804,4 +849,19 @@
 
 .app-good-news .app-alert-title {
     color: #389e0d;
+}
+
+.app-rewind-ready {
+    background-color: #f9f0ff;
+    border-color: #d3adf7;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.app-rewind-ready:hover {
+    transform: scale(1.02);
+}
+
+.app-rewind-ready .app-alert-title {
+    color: #531dab;
 }

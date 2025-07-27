@@ -14,6 +14,7 @@ import BiometricPanel from './BiometricPanel'; // Import the new panel
 import GuardianAppPanel from './GuardianAppPanel'; // Import the new panel
 import DroneAnimation from './DroneAnimation'; // Import the new component
 import ArjunsAppPanel from './ArjunsAppPanel'; // Import the new component
+import AkashicDashboardPage from './AkashicDashboardPage'; // Import the new dashboard
 
 function ProfessionalDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -38,6 +39,17 @@ function ProfessionalDashboard() {
   const [koshState, setKoshState] = useState('inactive'); // inactive, reporting, searching, located, dispatched, complete
   const [showArjunsApp, setShowArjunsApp] = useState(false);
   const [koshAlert, setKoshAlert] = useState(null);
+
+  // States for Project Akashic
+  const [akashicState, setAkashicState] = useState('inactive'); // inactive, processing, ready
+
+  const handleActivateAkashic = () => {
+    setAkashicState('processing');
+    setTimeout(() => {
+        setAkashicState('ready');
+        setActivePage('akashic'); // Switch to the new BI dashboard
+    }, 3000); // 3-second "processing" time
+  };
 
   const handleStartKoshSimulation = () => {
     setKoshState('reporting');
@@ -201,7 +213,10 @@ function ProfessionalDashboard() {
                     handleActivateGuardianNetwork={handleActivateGuardianNetwork} // Pass the new handler
                     handleDeployKiliDrone={handleDeployKiliDrone} // Pass the new handler
                     handleStartKoshSimulation={handleStartKoshSimulation} // Pass the new handler
+                    handleActivateAkashic={handleActivateAkashic} // Pass the new handler
                 />;
+      case 'akashic':
+        return <AkashicDashboardPage />;
       default:
         return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} anomalySimulationState={anomalySimulationState} isKiliDroneActive={isKiliDroneActive} />;
     }
@@ -223,6 +238,9 @@ function ProfessionalDashboard() {
                 <a href="#audit" className={`pd-nav-item${activePage === 'audit' ? ' active' : ''}`} onClick={() => setActivePage('audit')}>Audit Log</a>
                 <a href="#simulations" className={`pd-nav-item${activePage === 'simulations' ? ' active' : ''}`} onClick={() => setActivePage('simulations')}>Simulations</a>
                 <a href="#settings" className={`pd-nav-item${activePage === 'settings' ? ' active' : ''}`} onClick={() => setActivePage('settings')}>Settings</a>
+                {akashicState === 'ready' && (
+                    <a href="#akashic" className={`pd-nav-item${activePage === 'akashic' ? ' active' : ''}`} onClick={() => setActivePage('akashic')}>Akashic BI</a>
+                )}
             </nav>
             <div className="sidebar-footer">
                 <p>Version 2.1.0</p>
@@ -230,63 +248,70 @@ function ProfessionalDashboard() {
             </div>
         </aside>
 
-        <main className="pd-main-content">
-          <header className="pd-header">
-            <h1>Visual Command Center</h1>
-            <p>Real-time CCTV Monitoring</p>
-            <div>
-              {anomalySimulationState !== 'inactive' && anomalySimulationState !== 'summary-open' ? (
-                <button className="consult-ai-button resolve-button" onClick={handleResolveSimulation}>
-                  End Simulation & Get Summary
-                </button>
-              ) : null}
+        {akashicState === 'processing' ? (
+            <div className="akashic-processing-overlay">
+                <h1>Event Concluded.</h1>
+                <p>Processing Event Data...</p>
+            </div>
+        ) : (
+            <main className="pd-main-content">
+              <header className="pd-header">
+                <h1>Visual Command Center</h1>
+                <p>Real-time CCTV Monitoring</p>
+                <div>
+                  {anomalySimulationState !== 'inactive' && anomalySimulationState !== 'summary-open' ? (
+                    <button className="consult-ai-button resolve-button" onClick={handleResolveSimulation}>
+                      End Simulation & Get Summary
+                    </button>
+                  ) : null}
 
-              {(anomalySimulationState === 'dispatch-route' || anomalySimulationState === 'echo-active') && (
-                 <>
-                   <button 
-                     className="consult-ai-button" 
-                     onClick={handleActivateEcho} 
-                     disabled={anomalySimulationState !== 'dispatch-route'}
-                   >
-                     Activate Project Echo
-                   </button>
-                   <button className="consult-ai-button" onClick={handleDeployChimera}>Deploy Project Chimera</button>
-                 </>
+                  {(anomalySimulationState === 'dispatch-route' || anomalySimulationState === 'echo-active') && (
+                     <>
+                       <button 
+                         className="consult-ai-button" 
+                         onClick={handleActivateEcho} 
+                         disabled={anomalySimulationState !== 'dispatch-route'}
+                       >
+                         Activate Project Echo
+                       </button>
+                       <button className="consult-ai-button" onClick={handleDeployChimera}>Deploy Project Chimera</button>
+                     </>
+                  )}
+                  
+                  <button className="consult-ai-button" onClick={() => setIsChatOpen(true)}>
+                    <i className="fas fa-brain"></i> Consult AI Oracle
+                  </button>
+                </div>
+              </header>
+
+              {showDispatchAlert && (
+                <div className="dispatch-alert">
+                  <span>AUTOMATED DISPATCH: Agent built with Vertex AI Agent Builder has dispatched nearest security unit (S-14). Route displayed on map.</span>
+                  <button className="close-alert-button" onClick={() => setShowDispatchAlert(false)}>&times;</button>
+                </div>
               )}
-              
-              <button className="consult-ai-button" onClick={() => setIsChatOpen(true)}>
-                <i className="fas fa-brain"></i> Consult AI Oracle
-              </button>
-            </div>
-          </header>
 
-          {showDispatchAlert && (
-            <div className="dispatch-alert">
-              <span>AUTOMATED DISPATCH: Agent built with Vertex AI Agent Builder has dispatched nearest security unit (S-14). Route displayed on map.</span>
-              <button className="close-alert-button" onClick={() => setShowDispatchAlert(false)}>&times;</button>
-            </div>
-          )}
-
-          <div className="visual-layout">
-            {renderContent()}
-          </div>
-          
-          {koshAlert && (
-              <div className="dispatch-alert kosh-alert">
-                  <span>{koshAlert}</span>
-                  <button className="close-alert-button" onClick={() => setKoshAlert(null)}>&times;</button>
+              <div className="visual-layout">
+                {renderContent()}
               </div>
-          )}
+              
+              {koshAlert && (
+                  <div className="dispatch-alert kosh-alert">
+                      <span>{koshAlert}</span>
+                      <button className="close-alert-button" onClick={() => setKoshAlert(null)}>&times;</button>
+                  </div>
+              )}
 
-          {/* Floating Panels Area */}
-          <div className="floating-panels-area">
-            {showPriyasApp && <PriyasAppPanel onGuideMeClick={handleGuidePriya} onClose={() => setShowPriyasApp(false)} />}
-            {showGuardianApp && <GuardianAppPanel onClose={() => setShowGuardianApp(false)} />}
-            {showSoundscape && <SoundscapePanel isDistress={isDistress} onClose={() => setShowSoundscape(false)} />}
-            {showBiometrics && <BiometricPanel onClose={() => setShowBiometrics(false)} />}
-            {showArjunsApp && <ArjunsAppPanel onReportSubmit={handleKoshReportSubmit} onClose={() => setShowArjunsApp(false)} koshState={koshState} />}
-          </div>
-        </main>
+              {/* Floating Panels Area */}
+              <div className="floating-panels-area">
+                {showPriyasApp && <PriyasAppPanel onGuideMeClick={handleGuidePriya} onClose={() => setShowPriyasApp(false)} />}
+                {showGuardianApp && <GuardianAppPanel onClose={() => setShowGuardianApp(false)} />}
+                {showSoundscape && <SoundscapePanel isDistress={isDistress} onClose={() => setShowSoundscape(false)} />}
+                {showBiometrics && <BiometricPanel onClose={() => setShowBiometrics(false)} />}
+                {showArjunsApp && <ArjunsAppPanel onReportSubmit={handleKoshReportSubmit} onClose={() => setShowArjunsApp(false)} koshState={koshState} akashicState={akashicState} />}
+              </div>
+            </main>
+        )}
         
         {showDroneAnimation && <DroneAnimation onAnimationEnd={handleDroneAnimationEnd} />}
         

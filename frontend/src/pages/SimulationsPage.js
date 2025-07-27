@@ -13,10 +13,22 @@ const SimulationsPage = ({
     handleActivateGuardianNetwork, // New handler
     handleDeployKiliDrone, // New handler
     handleStartKoshSimulation, // New handler for Project Kosh
+    handleActivateAkashic, // New handler
 }) => {
     return (
         <div className="simulations-control-panel">
             <div className="panel-header">ADMIN SIMULATION CONTROLS</div>
+            <div className="simulation-group">
+                <h3>Project Akashic (The Living Memory)</h3>
+                <p>Demonstrates the post-event data analysis and personalized attendee experience.</p>
+                <button 
+                    className="admin-button resolve-button" 
+                    onClick={handleActivateAkashic}
+                    disabled={anomalySimulationState !== 'inactive'}
+                >
+                    End Event & Activate Project Akashic
+                </button>
+            </div>
             <div className="simulation-group">
                 <h3>Project Kosh (AI Lost & Found)</h3>
                 <p>Demonstrates an AI-powered, privacy-preserving search and recovery for lost items.</p>
