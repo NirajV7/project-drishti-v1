@@ -4,7 +4,7 @@ import './AIChatPanel.css';
 
 const API_KEY = "AIzaSyBFxnbKs6ALSH-vQ_RBU2XVpvdv_8za7bk";
 
-function AIChatPanel({ context, onClose, setActivePage }) {
+function AIChatPanel({ context, onClose, setActivePage, setGhostProtocolScenarioId }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -74,13 +74,13 @@ function AIChatPanel({ context, onClose, setActivePage }) {
         
         setMessages(prev => [...prev, { sender: 'ai', text: '' }]);
 
-        let aiResponse = '';
+        let currentResponse = '';
         for await (const chunk of result.stream) {
             const chunkText = chunk.text();
-            aiResponse += chunkText;
+            currentResponse += chunkText;
             setMessages(prev => {
                 const updatedMessages = [...prev];
-                updatedMessages[updatedMessages.length - 1].text = aiResponse;
+                updatedMessages[updatedMessages.length - 1].text = currentResponse;
                 return updatedMessages;
             });
         }
@@ -88,7 +88,6 @@ function AIChatPanel({ context, onClose, setActivePage }) {
         if (query.toLowerCase().includes("best actions")) {
             setShowSimulationPrompt(true);
         }
-
     } catch (error) {
         console.error("Error fetching AI response:", error);
         setMessages([...newMessages, { sender: 'ai', text: 'Sorry, I am having trouble connecting to the network.' }]);
@@ -100,6 +99,7 @@ function AIChatPanel({ context, onClose, setActivePage }) {
   const handleSimulationChoice = (choice) => {
     setShowSimulationPrompt(false);
     if (choice === 'yes' && setActivePage) {
+        setGhostProtocolScenarioId(1); // Select "Disperse from Center"
         setActivePage('ghost');
         onClose(); // Close the chat panel
     } else {
@@ -135,9 +135,9 @@ function AIChatPanel({ context, onClose, setActivePage }) {
 
           {showSimulationPrompt && (
             <div className="message ai simulation-prompt">
-              <p>Would you like to run a simulation?</p>
+              <p>The optimal solution is to open Gate C. Would you like to run a simulation of this action?</p>
               <div className="simulation-buttons">
-                <button onClick={() => handleSimulationChoice('yes')}>Yes</button>
+                <button onClick={() => handleSimulationChoice('yes')}>Yes, run simulation</button>
                 <button onClick={() => handleSimulationChoice('no')}>No</button>
               </div>
             </div>

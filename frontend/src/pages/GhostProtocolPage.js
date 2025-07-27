@@ -53,13 +53,14 @@ function SimulationBox({ scenario, isThumbnail = false }) {
       }
     });
 
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+    const containerNode = containerRef.current;
+    if (containerNode) {
+      resizeObserver.observe(containerNode);
     }
 
     return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
+      if (containerNode) {
+        resizeObserver.unobserve(containerNode);
       }
     };
   }, []);
@@ -114,16 +115,15 @@ function SimulationBox({ scenario, isThumbnail = false }) {
   );
 }
 
-export default function GhostProtocolPage() {
-  const [selectedSim, setSelectedSim] = useState(1);
+export default function GhostProtocolPage({ ghostProtocolScenarioId, setGhostProtocolScenarioId }) {
 
   const renderSelectedSim = () => {
-    const scenario = simulationScenarios[selectedSim];
+    const scenario = simulationScenarios[ghostProtocolScenarioId];
     return (
       <div className="main-feed-content">
         <div className="feed-header">{scenario.title}</div>
         <div className="feed-visual-placeholder">
-            <SimulationBox key={selectedSim} scenario={scenario} />
+            <SimulationBox key={ghostProtocolScenarioId} scenario={scenario} />
         </div>
       </div>
     );
@@ -139,8 +139,8 @@ export default function GhostProtocolPage() {
         {Object.entries(simulationScenarios).map(([id, scenario]) => (
           <div
             key={id}
-            className={`camera-thumbnail ${selectedSim === parseInt(id) ? 'active' : ''}`}
-            onClick={() => setSelectedSim(parseInt(id))}
+            className={`camera-thumbnail ${ghostProtocolScenarioId === parseInt(id) ? 'active' : ''}`}
+            onClick={() => setGhostProtocolScenarioId(parseInt(id))}
           >
             <div className="thumb-header">{scenario.title}</div>
             <div className="thumb-visual">

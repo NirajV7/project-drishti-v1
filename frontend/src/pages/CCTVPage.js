@@ -25,7 +25,7 @@ const initialCameraData = {
     },
 };
 
-export default function CCTVPage({ setActivePage }) {
+export default function CCTVPage({ setActivePage, setGhostProtocolScenarioId }) {
     const { userRole } = useAuth();
     const [selectedFeed, setSelectedFeed] = useState(1);
     const [headcountData, setHeadcountData] = useState({});
@@ -232,6 +232,7 @@ export default function CCTVPage({ setActivePage }) {
               context={chatContext}
               onClose={() => setShowChat(false)}
               setActivePage={setActivePage}
+              setGhostProtocolScenarioId={setGhostProtocolScenarioId}
             />
           )}
     

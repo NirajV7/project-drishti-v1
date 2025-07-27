@@ -11,15 +11,17 @@ import AuditLogPage from './AuditLogPage';
 function ProfessionalDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [ghostProtocolScenarioId, setGhostProtocolScenarioId] = useState(1); // Default to 1
+  const [simulationStatus, setSimulationStatus] = useState('active'); // 'active' or 'resolved'
 
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard':
-        return <CCTVPage setActivePage={setActivePage} />;
+        return <CCTVPage setActivePage={setActivePage} setGhostProtocolScenarioId={setGhostProtocolScenarioId} />;
       case 'ghost':
-        return <GhostProtocolPage />;
+        return <GhostProtocolPage ghostProtocolScenarioId={ghostProtocolScenarioId} setGhostProtocolScenarioId={setGhostProtocolScenarioId} />;
       case 'map':
-        return <MapViewPage />;
+        return <MapViewPage simulationStatus={simulationStatus} />;
       case 'users':
         return <UserManagementPage />;
       case 'audit':
@@ -59,21 +61,30 @@ function ProfessionalDashboard() {
         </aside>
 
         <main className="pd-main-content">
-          <div className="pd-header">
+          <header className="pd-header">
+            <h1>Visual Command Center</h1>
+            <p>Real-time CCTV Monitoring</p>
             <div>
-              <h1>Visual Command Center</h1>
-              <p>Real-time CCTV Monitoring</p>
+              <button className="consult-ai-button" onClick={() => setSimulationStatus('resolved')}>
+                Resolve Simulation
+              </button>
+              <button className="consult-ai-button" onClick={() => setIsChatOpen(true)}>
+                <i className="fas fa-brain"></i> Consult AI Oracle
+              </button>
             </div>
-            <button className="ai-oracle-button" onClick={() => setIsChatOpen(true)}>
-              Consult AI Oracle
-            </button>
-          </div>
+          </header>
 
           <div className="visual-layout">
             {renderContent()}
           </div>
         </main>
-        {isChatOpen && <AIChatPanel context="General inquiry." onClose={() => setIsChatOpen(false)} setActivePage={setActivePage} />}
+        {isChatOpen && 
+            <AIChatPanel 
+                context="General inquiry." 
+                onClose={() => setIsChatOpen(false)} 
+                setActivePage={setActivePage}
+                setGhostProtocolScenarioId={setGhostProtocolScenarioId}
+            />}
       </div>
     </div>
   );
